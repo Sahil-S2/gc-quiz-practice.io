@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Professional GC Quiz Tool</title>
+<title>GC Audio Quiz Tool</title>
 <style>
     /* Professional Theme Variables */
     :root {
-        --primary-color: #2c3e50; /* Dark Slate (Headers) */
-        --accent-color: #0056b3;  /* Professional Blue (Interactions) */
-        --bg-color: #f0f2f5;      /* Light Gray (Background) */
-        --card-bg: #ffffff;       /* White (Cards) */
-        --text-main: #333333;     /* Dark Gray (Text) */
-        --text-light: #666666;    /* Medium Gray (Citations) */
-        --success-color: #198754; /* Green (Answers) */
-        --border-color: #e0e0e0;  /* Subtle borders */
+        --primary-color: #2c3e50; /* Dark Slate */
+        --accent-color: #0056b3;  /* Blue */
+        --bg-color: #f0f2f5;      /* Light Gray */
+        --card-bg: #ffffff;
+        --text-main: #333333;
+        --text-light: #666666;
+        --success-color: #198754;
+        --border-color: #e0e0e0;
+        --highlight-color: #fff3cd; /* Yellow for active audio */
+        --highlight-border: #ffc107;
     }
 
     body {
@@ -27,23 +29,12 @@
         line-height: 1.6;
     }
 
-    /* Header Styling */
-    header {
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    h1 {
-        color: var(--primary-color);
-        margin-bottom: 10px;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-    }
-    .subtitle {
-        color: var(--text-light);
-        font-size: 1.1em;
-    }
+    /* Header */
+    header { text-align: center; margin-bottom: 30px; }
+    h1 { color: var(--primary-color); margin-bottom: 10px; font-weight: 700; }
+    .subtitle { color: var(--text-light); font-size: 1.1em; }
 
-    /* Controls Section (Search + Buttons) */
+    /* Controls */
     .controls {
         display: flex;
         gap: 10px;
@@ -58,11 +49,8 @@
         border: 2px solid var(--border-color);
         border-radius: 6px;
         outline: none;
-        transition: border-color 0.2s;
     }
-    .search-box:focus {
-        border-color: var(--accent-color);
-    }
+    .search-box:focus { border-color: var(--accent-color); }
 
     .action-btn {
         padding: 12px 20px;
@@ -72,15 +60,22 @@
         border-radius: 6px;
         cursor: pointer;
         font-weight: 600;
-        font-size: 15px;
-        transition: background-color 0.2s, transform 0.1s;
-        white-space: nowrap;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
-    .action-btn:hover {
-        background-color: #004494;
-    }
-    .action-btn:active {
-        transform: scale(0.98);
+    .action-btn:hover { background-color: #004494; }
+
+    /* Specific Audio Button Style */
+    #audioBtn { background-color: #6610f2; }
+    #audioBtn:hover { background-color: #520dc2; }
+    #audioBtn.speaking { background-color: #dc3545; animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
     }
 
     /* Card Styling */
@@ -93,13 +88,15 @@
         cursor: pointer;
         overflow: hidden;
         transition: all 0.2s ease;
-        position: relative;
     }
 
-    .card:hover {
-        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-        border-color: #bdc3c7;
+    .card:hover { transform: translateY(-2px); border-color: #bdc3c7; }
+
+    /* Active Audio State */
+    .card.active-reading {
+        background-color: var(--highlight-color);
+        border-color: var(--highlight-border);
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
     }
 
     .card-header {
@@ -109,10 +106,7 @@
         justify-content: space-between;
     }
 
-    .question-container {
-        display: flex;
-        gap: 15px;
-    }
+    .question-container { display: flex; gap: 15px; }
 
     .number-badge {
         background-color: var(--bg-color);
@@ -124,67 +118,34 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        font-size: 0.9em;
         border: 1px solid var(--border-color);
     }
-
-    .question-text {
-        font-weight: 600;
-        font-size: 1.1em;
-        color: var(--primary-color);
-        margin-top: 2px;
+    
+    .card.active-reading .number-badge {
+        background-color: #fff;
+        border-color: var(--highlight-border);
     }
 
-    .expand-icon {
-        color: #aaa;
-        font-size: 1.2em;
-        margin-left: 10px;
-        transition: transform 0.3s;
-    }
+    .question-text { font-weight: 600; font-size: 1.1em; color: var(--primary-color); margin-top: 2px; }
+    .expand-icon { color: #aaa; font-size: 1.2em; transition: transform 0.3s; }
 
-    /* Answer Section */
+    /* Answer Body */
     .answer-body {
         max-height: 0;
         overflow: hidden;
         background-color: #fcfcfc;
-        border-top: 1px solid transparent;
-        transition: max-height 0.3s ease-out, padding 0.3s ease, border-color 0.3s;
+        transition: max-height 0.3s ease-out;
     }
+    .card.active-reading .answer-body { background-color: #fff9e6; }
 
-    .answer-content {
-        padding: 0 20px 20px 65px; /* Indent to align with text */
-    }
+    .answer-content { padding: 0 20px 20px 65px; }
+    .answer-text { color: var(--success-color); font-weight: 500; font-size: 1.05em; margin-bottom: 8px; }
+    .citation { display: block; font-size: 0.85em; color: var(--text-light); font-style: italic; border-left: 3px solid #ddd; padding-left: 10px; }
 
-    .answer-text {
-        color: var(--success-color);
-        font-weight: 500;
-        font-size: 1.05em;
-        margin-bottom: 8px;
-    }
-
-    .citation {
-        display: block;
-        font-size: 0.85em;
-        color: var(--text-light);
-        font-style: italic;
-        border-left: 3px solid #ddd;
-        padding-left: 10px;
-    }
-
-    /* Active State (Revealed) */
-    .card.revealed .answer-body {
-        max-height: 200px; /* Arbitrary large height */
-        border-top-color: var(--border-color);
-    }
-    
-    .card.revealed .expand-icon {
-        transform: rotate(180deg);
-        color: var(--accent-color);
-    }
-
-    .card.revealed {
-        border-left: 4px solid var(--accent-color);
-    }
+    /* Revealed State */
+    .card.revealed .answer-body { max-height: 500px; border-top: 1px solid var(--border-color); }
+    .card.revealed .expand-icon { transform: rotate(180deg); color: var(--accent-color); }
+    .card.revealed { border-left: 4px solid var(--accent-color); }
 
 </style>
 </head>
@@ -192,12 +153,15 @@
 
 <header>
     <h1>Construction GC Exam Prep</h1>
-    <div class="subtitle">Interactive Quiz Module</div>
+    <div class="subtitle">Audio Study Companion</div>
 </header>
 
 <div class="controls">
-    <input type="text" id="searchInput" class="search-box" placeholder="Type to filter questions (e.g., 'concrete', 'fire')..." onkeyup="filterQuestions()">
-    <button id="toggleAllBtn" class="action-btn" onclick="toggleAll()">Expand All Answers</button>
+    <input type="text" id="searchInput" class="search-box" placeholder="Type to filter..." onkeyup="filterQuestions()">
+    <button id="audioBtn" class="action-btn" onclick="toggleAudio()">
+        <span id="audioIcon">▶</span> <span id="audioText">Listen to Quiz</span>
+    </button>
+    <button id="toggleAllBtn" class="action-btn" onclick="toggleAll()">Expand All</button>
 </div>
 
 <div id="quiz-container"></div>
@@ -887,27 +851,32 @@
 
     const container = document.getElementById('quiz-container');
     const toggleBtn = document.getElementById('toggleAllBtn');
+    const audioBtn = document.getElementById('audioBtn');
     let isAllExpanded = false;
+    let isSpeaking = false;
+    let synth = window.speechSynthesis;
+    let currentUtteranceIndex = 0;
+    let visibleCards = []; // Store currently visible cards for audio navigation
 
+    // --- RENDER LOGIC ---
     function renderQuiz(filterText = "") {
         container.innerHTML = "";
+        visibleCards = []; // Reset tracked cards
         const lowerFilter = filterText.toLowerCase();
-        let displayIndex = 1; // Counter for numbering
+        let displayIndex = 1;
 
-        quizData.forEach(item => {
+        quizData.forEach((item, index) => {
             if (item.q.toLowerCase().includes(lowerFilter) || item.a.toLowerCase().includes(lowerFilter)) {
                 
-                // Create Card
                 const card = document.createElement('div');
                 card.className = 'card';
+                card.id = `card-${index}`; // Unique ID for highlighting
                 
-                // Toggle Logic on Click
                 card.onclick = function() { 
                     this.classList.toggle('revealed'); 
                     updateToggleButtonState();
                 };
                 
-                // HTML Structure
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="question-container">
@@ -925,52 +894,125 @@
                 `;
 
                 container.appendChild(card);
+                // Store data needed for audio playback
+                visibleCards.push({
+                    id: `card-${index}`,
+                    q: item.q,
+                    a: item.a.split('[')[0] // Clean answer for audio
+                });
                 displayIndex++;
             }
         });
         
-        // If we re-render (search), reset the "Expand All" button state
         isAllExpanded = false;
-        toggleBtn.textContent = "Expand All Answers";
+        toggleBtn.textContent = "Expand All";
     }
 
-    // --- NEW FUNCTION: Toggle All ---
+    // --- EXPAND/COLLAPSE ALL ---
     function toggleAll() {
         const cards = document.querySelectorAll('.card');
-        isAllExpanded = !isAllExpanded; // Flip the state
-
-        cards.forEach(card => {
-            if (isAllExpanded) {
-                card.classList.add('revealed');
-            } else {
-                card.classList.remove('revealed');
-            }
-        });
-
-        // Update Button Text
-        toggleBtn.textContent = isAllExpanded ? "Collapse All Answers" : "Expand All Answers";
+        isAllExpanded = !isAllExpanded;
+        cards.forEach(card => isAllExpanded ? card.classList.add('revealed') : card.classList.remove('revealed'));
+        toggleBtn.textContent = isAllExpanded ? "Collapse All" : "Expand All";
     }
 
-    // Helper to see if user manually opened all of them
     function updateToggleButtonState() {
         const cards = document.querySelectorAll('.card');
         const allOpen = Array.from(cards).every(c => c.classList.contains('revealed'));
-        
-        if (allOpen) {
-            isAllExpanded = true;
-            toggleBtn.textContent = "Collapse All Answers";
-        } else {
-            isAllExpanded = false;
-            toggleBtn.textContent = "Expand All Answers";
-        }
+        isAllExpanded = allOpen;
+        toggleBtn.textContent = isAllExpanded ? "Collapse All" : "Expand All";
     }
 
     function filterQuestions() {
+        stopAudio(); // Stop audio if user searches
         const input = document.getElementById('searchInput');
         renderQuiz(input.value);
     }
 
-    // Initial Render
+    // --- AUDIO LOGIC ---
+    function toggleAudio() {
+        if (isSpeaking) {
+            stopAudio();
+        } else {
+            startAudio();
+        }
+    }
+
+    function startAudio() {
+        if (visibleCards.length === 0) return;
+
+        isSpeaking = true;
+        updateAudioButtonUI();
+        currentUtteranceIndex = 0;
+        speakNextCard();
+    }
+
+    function stopAudio() {
+        synth.cancel();
+        isSpeaking = false;
+        updateAudioButtonUI();
+        clearHighlights();
+    }
+
+    function speakNextCard() {
+        if (!isSpeaking || currentUtteranceIndex >= visibleCards.length) {
+            stopAudio();
+            return;
+        }
+
+        const data = visibleCards[currentUtteranceIndex];
+        const cardElement = document.getElementById(data.id);
+
+        // Highlight current card
+        clearHighlights();
+        if(cardElement) {
+            cardElement.classList.add('active-reading');
+            // Auto scroll to card
+            cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Create text to speak (Add pause between Q and A)
+        // We replace common abbreviations for better speech
+        let textToRead = `Question ${currentUtteranceIndex + 1}. ${data.q}. Answer. ${data.a}`;
+        
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.rate = 1.0; // Normal speed
+        utterance.pitch = 1.0;
+
+        // When done, move to next
+        utterance.onend = function() {
+            currentUtteranceIndex++;
+            speakNextCard();
+        };
+
+        // If error (e.g., user navigates away), stop
+        utterance.onerror = function() {
+            stopAudio();
+        };
+
+        synth.speak(utterance);
+    }
+
+    function clearHighlights() {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active-reading'));
+    }
+
+    function updateAudioButtonUI() {
+        const icon = document.getElementById('audioIcon');
+        const text = document.getElementById('audioText');
+        
+        if (isSpeaking) {
+            audioBtn.classList.add('speaking');
+            icon.textContent = "⏹";
+            text.textContent = "Stop Audio";
+        } else {
+            audioBtn.classList.remove('speaking');
+            icon.textContent = "▶";
+            text.textContent = "Listen to Quiz";
+        }
+    }
+
+    // Initialize
     renderQuiz();
 </script>
 
