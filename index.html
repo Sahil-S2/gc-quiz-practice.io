@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GC Exam Master - Dark Mode</title>
+<style>
+    /* --- PROFESSIONAL DARK THEME VARIABLES --- */
+    :root {
+        --bg: #0f172a;         /* Deep Slate Background */
+        --card-bg: #1e293b;    /* Lighter Slate Card */
+        --header-bg: #1e293b;  /* Header Background */
+        
+        --text-main: #f8fafc;  /* Bright White Text */
+        --text-muted: #94a3b8; /* Muted Gray Text */
+        
+        --accent: #3b82f6;     /* Professional Blue */
+        --accent-hover: #2563eb;
+        
+        --success: #4ade80;    /* Bright Green for Answers */
+        --warning: #facc15;    /* Yellow for Flag 1 */
+        --danger: #ef4444;     /* Red for Flag 2 */
+        --info: #22d3ee;       /* Cyan for Flag 3 */
+        
+        --border: #334155;     /* Subtle Border */
+        --input-bg: #020617;   /* Very Dark Input Background */
+        
+        --player-bg: #1e293b;
+    }
+
+    /* Force Dark Scrollbars & Native Inputs */
+    html { color-scheme: dark; }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text-main);
+        margin: 0;
+        padding: 15px 15px 240px 15px; /* Huge bottom padding for mobile player */
+        line-height: 1.5;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    /* --- HEADER --- */
+    header { text-align: center; margin-bottom: 25px; }
+    h1 { color: var(--text-main); margin: 0; font-size: 1.8em; letter-spacing: -0.5px; }
+    .subtitle { color: var(--text-muted); font-size: 0.95em; margin-top: 5px; }
+
+    /* --- TOP CONTROLS --- */
+    .top-controls {
+        display: flex; gap: 10px; margin-bottom: 20px;
+        background: var(--card-bg); padding: 15px; border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
+        flex-direction: column; /* Stack vertically on mobile */
+    }
+
+    /* Dark Inputs */
+    .search-box, .folder-select {
+        width: 100%; 
+        padding: 12px 15px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 16px; 
+        color: var(--text-main);
+        outline: none;
+    }
+    .search-box:focus, .folder-select:focus { border-color: var(--accent); }
+
+    .control-row { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
+    .folder-select { flex: 2; font-weight: 600; cursor: pointer; min-width: 150px; }
+
+    .btn {
+        padding: 12px; background: var(--accent); color: white;
+        border: none; border-radius: 8px; cursor: pointer;
+        font-weight: 600; font-size: 14px; flex: 1;
+        transition: background 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        white-space: nowrap;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .btn:active { transform: scale(0.98); }
+    
+    /* --- CARDS --- */
+    .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-left: 5px solid var(--accent);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: transform 0.1s;
+        scroll-margin-top: 20px;
+    }
+
+    .card.active-reading {
+        border-left-color: var(--warning);
+        background-color: #334155; 
+        box-shadow: 0 0 0 2px var(--warning);
+    }
+
+    /* Flag Colors */
+    .card[data-flag="1"] { border-left-color: var(--warning); }
+    .card[data-flag="2"] { border-left-color: var(--danger); }
+    .card[data-flag="3"] { border-left-color: var(--info); }
+
+    .card-header { 
+        padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; 
+        cursor: pointer;
+        min-height: 60px; /* Make tap target larger */
+    }
+
+    .q-content { display: flex; gap: 12px; align-items: flex-start; flex: 1; padding-right: 10px; }
+    
+    .q-num { 
+        background: var(--input-bg); color: var(--text-muted); 
+        min-width: 28px; height: 28px; border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+        font-size: 0.8em; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+        border: 1px solid var(--border);
+    }
+    
+    .q-text { font-weight: 500; font-size: 1.05em; color: var(--text-main); line-height: 1.4; }
+
+    /* --- 3 DOT MENU (Dark) --- */
+    .menu-wrapper { position: relative; height: 100%; }
+    .menu-btn {
+        background: none; border: none; font-size: 24px; color: var(--text-muted);
+        padding: 0 15px; cursor: pointer; line-height: 1; height: 100%;
+        display: flex; align-items: center;
+    }
+    .menu-dropdown {
+        display: none; position: absolute; right: 0; top: 35px;
+        background: var(--input-bg); border: 1px solid var(--border);
+        border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        width: 220px; z-index: 100; overflow: hidden;
+    }
+    .menu-dropdown.show { display: block; }
+    .menu-item {
+        padding: 14px 15px; font-size: 14px; color: var(--text-main);
+        border-bottom: 1px solid var(--border); cursor: pointer;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .menu-item:hover { background: var(--border); }
+    .menu-item:last-child { border-bottom: none; }
+
+    /* Badges */
+    .flag-badge {
+        display: inline-block; font-size: 0.7em; padding: 3px 8px;
+        border-radius: 4px; margin-top: 6px; font-weight: bold; color: #000;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-1 { background-color: var(--warning); }
+    .badge-2 { background-color: var(--danger); color: white;}
+    .badge-3 { background-color: var(--info); }
+
+    /* Answer Box & Comment Section */
+    .answer-box {
+        max-height: 0; overflow: hidden; background: #162032; 
+        transition: max-height 0.3s ease-out;
+    }
+    .card.revealed .answer-box { max-height: 1200px; border-top: 1px solid var(--border); }
+    
+    .ans-content { padding: 20px; margin-left: 0; }
+    .ans-text { color: var(--success); font-weight: 500; font-size: 1.1em; }
+    .citation { display: block; margin-top: 10px; font-size: 0.85em; color: var(--text-muted); font-style: italic; }
+
+    .comment-section {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed var(--border);
+    }
+    .comment-label {
+        font-size: 0.85em;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        display: block;
+        font-weight: 600;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .comment-box {
+        width: 100%;
+        background-color: var(--input-bg);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        border-radius: 8px;
+        padding: 10px;
+        font-family: inherit;
+        font-size: 0.95em;
+        resize: vertical;
+        min-height: 60px;
+        transition: border-color 0.2s;
+    }
+    .comment-box:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+    .comment-box::placeholder { color: #475569; }
+
+    /* --- PLAYER (Dark) --- */
+    .audio-player {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: var(--player-bg); 
+        border-top: 1px solid var(--border);
+        padding: 15px; 
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.6); 
+        z-index: 9999;
+        border-top-left-radius: 16px; border-top-right-radius: 16px;
+        display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .player-controls { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 10px; }
+    
+    .p-btn {
+        background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
+        color: var(--text-main); padding: 12px; border-radius: 10px; 
+        cursor: pointer; font-size: 18px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .p-btn:active { background: rgba(255,255,255,0.1); }
+    .p-btn-main { background: var(--accent); border: none; font-weight: bold; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+    
+    .player-select, .player-input { 
+        background: var(--input-bg); border: 1px solid var(--border); 
+        color: var(--text-main); padding: 6px; border-radius: 6px; 
+    }
+    .player-row-top { display: flex; justify-content: space-between; font-size: 0.85em; color: var(--text-muted); }
+    
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>GC Exam Master</h1>
+        <div class="subtitle">Dark Mobile Edition</div>
+    </header>
+
+    <div class="top-controls">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search questions..." onkeyup="handleSearch()">
+        <div class="control-row">
+            <select id="folderSelect" class="folder-select" onchange="filterByFolder()">
+                <option value="all">📂 All Questions</option>
+                <option value="1">🚩 Flag 1: Difficult</option>
+                <option value="2">⚠️ Flag 2: Misinfo</option>
+                <option value="3">🛠️ Flag 3: Changes</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <button class="btn" style="background: #7c3aed;" onclick="shuffleData()">🔀 Shuffle</button>
+            <button id="expandAllBtn" class="btn" style="background: #059669;" onclick="toggleAllCards()">🔽 Expand All</button>
+        </div>
+    </div>
+
+    <div id="quiz-list"></div>
+</div>
+
+<div class="audio-player">
+    <div class="player-row-top">
+        <div id="statusDisplay">Ready</div>
+        <div style="display:flex; gap:5px; align-items:center;">
+            <select id="sectionSelect" class="player-select" onchange="jumpToSection()"><option value="all">Sections</option></select>
+            <input type="number" id="jumpInput" class="player-input" style="width:50px; text-align:center;" min="1" placeholder="#">
+            <button class="p-btn" style="padding:4px 10px; font-size:14px;" onclick="jumpToNumber()">Go</button>
+        </div>
+    </div>
+    <div class="player-controls">
+        <button class="p-btn" onclick="skip(-1)">⏮</button>
+        <button class="p-btn p-btn-main" id="playPauseBtn" onclick="togglePlay()">▶ Play</button>
+        <button class="p-btn" onclick="skip(1)">⏭</button>
+    </div>
+    <button class="p-btn" style="background: #ef4444; width:100%; font-size:14px; padding:10px; border:none;" onclick="stopAudio()">⏹ Stop Audio</button>
+</div>
+
+<script>
+    // --- DATA ---
+    // (Ensure you have your full list here.)
+    let rawData = [
+        { q: "Products (Bases, Plasters, Limes)", a: "Gypsum, Chapter 7" },
+        { q: "Conventional Plaster Applications", a: "Gypsum, Chapter 8" },
+        { q: "Safety Considerations and Material Handling (Gypsum)", a: "Gypsum, Chapter 13" },
+        { q: "Tools and Equipment (Gypsum and Plaster)", a: "Gypsum, Chapter 14" },
+        { q: "Concrete Mixture (Control Tests, Materials)", a: "Concrete, Chapter 2" },
+        { q: "Foundations (Bearing Capacity, Types, Forms)", a: "Concrete, Chapter 4" },
+        { q: "Formwork (Materials, Design, Pressures)", a: "Concrete, Chapter 5" },
+        { q: "Reinforcement in Structures (Types, Fabrication, Placing)", a: "Concrete, Chapter 6" },
+        { q: "Joints and Embedments in Structures", a: "Concrete, Chapter 7" },
+        { q: "Joints and Reinforcement for Slabs-on-Ground", a: "Concrete, Chapter 8" },
+        { q: "Preparing for Concreting (Pre-placement, Checklists)", a: "Concrete, Chapter 9" },
+        { q: "Concrete Placement and Finishing", a: "Concrete, Chapter 11 (or 10 in older editions)" },
+        { q: "Crew & Equipment Productivity", a: "Pipe & Exc., Chapter 2" },
+        { q: "Reading Plans & Surveying", a: "Pipe & Exc., Chapter 3" },
+        { q: "Operating a Backhoe", a: "Pipe & Exc., Chapter 5" },
+        { q: "Soil Compaction (Structure, Density, Methods)", a: "Pipe & Exc., Chapter 6" },
+        { q: "Installing Sewer & Stormwater Systems", a: "Pipe & Exc., Chapter 8" },
+        { q: "Estimating Surface Excavation", a: "Pipe & Exc., Chapter 9" },
+        { q: "Dealing with Rock & Groundwater", a: "Pipe & Exc., Chapter 10" },
+        { q: "Pipe Materials (DWV, Pressure, Joints)", a: "Pipe & Exc., Chapter 11" },
+        { q: "Occupancy Classification and Use", a: "IBC, Chapter 3" },
+        { q: "General Building Heights and Areas", a: "IBC, Chapter 5" },
+        { q: "Types of Construction", a: "IBC, Chapter 6" },
+        { q: "Fire and Smoke Protection Features", a: "IBC, Chapter 7" },
+        { q: "Interior Finishes", a: "IBC, Chapter 8" },
+        { q: "Fire Protection and Life Safety Systems", a: "IBC, Chapter 9" },
+        { q: "Means of Egress", a: "IBC, Chapter 10" },
+        { q: "Accessibility", a: "IBC, Chapter 11" },
+        { q: "Interior Environment", a: "IBC, Chapter 12" },
+        { q: "Exterior Walls", a: "IBC, Chapter 14" },
+        { q: "Roof Assemblies and Rooftop Structures", a: "IBC, Chapter 15" },
+        { q: "Structural Design", a: "IBC, Chapter 16" },
+        { q: "Special Inspections and Tests", a: "IBC, Chapter 17" },
+        { q: "Soils and Foundations", a: "IBC, Chapter 18" },
+        { q: "Concrete", a: "IBC, Chapter 19" },
+        { q: "Masonry", a: "IBC, Chapter 21" },
+        { q: "Steel", a: "IBC, Chapter 22" },
+        { q: "Wood", a: "IBC, Chapter 23" },
+        { q: "Glass and Glazing", a: "IBC, Chapter 24" },
+        { q: "Gypsum Board, Gypsum Panel Products and Plaster", a: "IBC, Chapter 25" },
+        { q: "Building Planning (Residential)", a: "IRC, Chapter 3" },
+        { q: "Foundations (Residential)", a: "IRC, Chapter 4" },
+        { q: "Floors (Residential)", a: "IRC, Chapter 5" },
+        { q: "Wall Construction (Residential)", a: "IRC, Chapter 6" },
+        { q: "Wall Covering (Residential)", a: "IRC, Chapter 7" },
+        { q: "Roof-Ceiling Construction (Residential)", a: "IRC, Chapter 8" },
+        { q: "Roof Assemblies (Residential)", a: "IRC, Chapter 9" },
+        { q: "Chimneys and Fireplaces (Residential)", a: "IRC, Chapter 10" },
+        { q: "Energy Efficiency (Residential)", a: "IRC, Chapter 11" },
+        { q: "General Mechanical System Requirements (Residential)", a: "IRC, Chapter 13" },
+        { q: "Heating and Cooling Equipment (Residential)", a: "IRC, Chapter 14" },
+        { q: "Exhaust Systems (Residential)", a: "IRC, Chapter 15" },
+        { q: "Duct Systems (Residential)", a: "IRC, Chapter 16" },
+        { q: "General Plumbing Requirements (Residential)", a: "IRC, Chapter 25" },
+        { q: "Sanitary Drainage (Residential)", a: "IRC, Chapter 30" },
+        { q: "Vents (Plumbing Residential)", a: "IRC, Chapter 31" },
+        { q: "General Electrical Requirements (Residential)", a: "IRC, Chapter 34" },
+        { q: "Electrical Definitions (Residential)", a: "IRC, Chapter 35" },
+        { q: "Services (Electrical Residential)", a: "IRC, Chapter 36" },
+        { q: "Material Handling, Storage, Use, and Disposal (Safety)", a: "OSHA, Subpart H" },
+        { q: "Tools - Hand and Power (Safety)", a: "OSHA, Subpart I" },
+        { q: "Scaffolds (Safety)", a: "OSHA, Subpart L" },
+        { q: "Fall Protection (Safety)", a: "OSHA, Subpart M" },
+        { q: "Excavations (Safety)", a: "OSHA, Subpart P" },
+        { q: "Cranes and Derricks in Construction (Safety)", a: "OSHA, Subpart CC" },
+        { q: "Circular Saws (Types, Blades, Safety)", a: "Carpentry, Chapter 5, Section 5.1" },
+        { q: "Drills & Drivers (Types, Bits)", a: "Carpentry, Chapter 6, Section 6.1" },
+        { q: "Routers (Types, Bits, Safety)", a: "Carpentry, Chapter 6, Section 6.2" },
+        { q: "Power Nailers & Staplers (Pneumatic, Fasteners)", a: "Carpentry, Chapter 6, Section 6.5" },
+        { q: "Using Ladders & Scaffolds", a: "Carpentry, Chapter 7, Section 7.1" },
+        { q: "Concrete Basics (Ingredients, Hydration)", a: "Carpentry, Chapter 8, Section 8.1" },
+        { q: "Working with Concrete (Slump Testing, Curing)", a: "Carpentry, Chapter 8, Section 8.2" },
+        { q: "Footings (Monolithic, Stepped, Estimating)", a: "Carpentry, Chapter 10, Section 10.1" },
+        { q: "Concrete Foundation Walls (Forms, Ties, ICFs)", a: "Carpentry, Chapter 10, Section 10.2" },
+        { q: "Wall-Framing Materials (Lumber, Sheathing, Headers)", a: "Carpentry, Chapter 16, Section 16.1" },
+        { q: "Assembling & Erecting Walls (Corners, Bracing)", a: "Carpentry, Chapter 16, Section 16.3" },
+        { q: "Roof Assembly (Ridges, Rafters, Trusses)", a: "Carpentry, Chapter 19, Section 19.2" },
+        { q: "Strip Shingles (Underlayment, Laying, Hips/Ridges)", a: "Carpentry, Chapter 22, Section 22.2" },
+        { q: "Wood Shingles & Shakes (Exposure, Application)", a: "Carpentry, Chapter 22, Section 22.3" },
+        { q: "Wood Bevel Siding (Exposure, Installation)", a: "Carpentry, Chapter 23, Section 23.2" },
+        { q: "Stair Construction (Stringers, Treads, Risers)", a: "Carpentry, Chapter 25, Section 25.2" },
+        { q: "Choosing & Installing Cabinets (Types, Installation)", a: "Carpentry, Chapter 27, Section 27.2" },
+        { q: "Countertops (Laminate, Postformed)", a: "Carpentry, Chapter 27, Section 27.3" },
+        { q: "Masonry Tools & Equipment (Trowels, Jointers)", a: "Masonry, Chapter 3, Section 3.1" },
+        { q: "Jobsite Safety (OSHA, Hazards)", a: "Masonry, Chapter 4, Section 4.1" },
+        { q: "Mortar Proportions and Uses (Types M, S, N, O)", a: "Masonry, Chapter 10, Section 10.5" },
+        { q: "Metal Ties or Wires", a: "Masonry, Chapter 11, Section 11.1" },
+        { q: "Joint Reinforcement", a: "Masonry, Chapter 11, Section 11.4" },
+        { q: "Laying Common Brick Walls (Leads, Corners)", a: "Masonry, Chapter 12, Section 12.3" },
+        { q: "Cleaning New Masonry", a: "Masonry, Chapter 12, Section 12.5" },
+        { q: "Types of Concrete Masonry Walls (Cavity, Composite)", a: "Masonry, Chapter 13, Section 13.2" },
+        { q: "Laying Concrete Block Walls (Control Joints, Intersections)", a: "Masonry, Chapter 13, Section 13.4" },
+        { q: "Concrete Mix Design (Water-Cement Ratio)", a: "Masonry, Chapter 18, Section 18.2" },
+        { q: "Curing Concrete (Cold/Hot Weather)", a: "Masonry, Chapter 20, Section 20.2" },
+        { q: "Gypsum Panel Products (Types, Specs)", a: "Gypsum, Chapter 1" },
+        { q: "Fasteners (Screws, Nails for Gypsum)", a: "Gypsum, Chapter 1" },
+        { q: "Wood Framing (Gypsum Application)", a: "Gypsum, Chapter 2" },
+        { q: "Maximum Frame Spacing - Drywall Construction", a: "Gypsum, Chapter 2" },
+        { q: "Levels of Gypsum Finishing (0-5)", a: "Gypsum, Chapter 5" },
+        { q: "Veneer Plaster Finishes (One/Two Component)", a: "Gypsum, Chapter 6" },
+        { q: "Basecoat Plasters (Gypsum, Portland)", a: "Gypsum, Chapter 7" },
+        { q: "Applying Control Joints (Plaster)", a: "Gypsum, Chapter 8" },
+        { q: "Safety Tips for Installing Ceilings", a: "Gypsum, Chapter 13" },
+        { q: "Concrete Mix (Ingredients, Ratio)", a: "Concrete, Chapter 2" },
+        { q: "Slump Test Procedure", a: "Concrete, Chapter 2" },
+        { q: "Concrete Specifications (Strength, Slump, Air)", a: "Concrete, Chapter 3" },
+        { q: "Formwork Materials and Hardware", a: "Concrete, Chapter 5" },
+        { q: "Form Removal (Timing, Strength)", a: "Concrete, Chapter 5" },
+        { q: "Concrete Cover (Requirements)", a: "Concrete, Chapter 6" },
+        { q: "Splicing and Lapping (Reinforcement)", a: "Concrete, Chapter 6" },
+        { q: "Contraction (Control) Joints", a: "Concrete, Chapter 8" },
+        { q: "Hot Weather Placement", a: "Concrete, Chapter 11" },
+        { q: "Cold Weather Placement", a: "Concrete, Chapter 11" },
+        { q: "Common Field Problems (Cracking, Scaling)", a: "Concrete, Chapter 12" },
+        { q: "Crew & Equipment Productivity (Calculations)", a: "Pipe & Exc., Chapter 2" },
+        { q: "Reading Plans (Contour Lines, Symbols)", a: "Pipe & Exc., Chapter 3" },
+        { q: "Soil Types (A, B, C Classification)", a: "Pipe & Exc., Chapter 6" },
+        { q: "Compaction Methods (Equipment)", a: "Pipe & Exc., Chapter 6" },
+        { q: "Installing Water Systems (Thrust Blocks, Pressure)", a: "Pipe & Exc., Chapter 7" },
+        { q: "Installing Sewer Systems (Grades, Lasers)", a: "Pipe & Exc., Chapter 8" },
+        { q: "Estimating Cut and Fill (Cross Section Method)", a: "Pipe & Exc., Chapter 9" },
+        { q: "Working in Groundwater (Dewatering)", a: "Pipe & Exc., Chapter 10" },
+        { q: "Pipe Materials (PVC, DIP, RCP)", a: "Pipe & Exc., Chapter 11" },
+        { q: "Soil Classification (Visual/Manual Tests)", a: "OSHA Subpart P, Appendix A" },
+        { q: "Sloping and Benching (Maximum Allowable Slopes)", a: "OSHA Subpart P, Appendix B" },
+        { q: "Fall Protection Systems (Guardrails, Nets)", a: "OSHA Subpart M, 1926.502" },
+        { q: "Scaffolding Capacity (4x Load)", a: "OSHA Subpart L, 1926.451" },
+        { q: "Stairways (Handrails, Risers)", a: "OSHA Subpart X, 1926.1052" },
+        { q: "Ladders (Portable, Fixed)", a: "OSHA Subpart X, 1926.1053" },
+        { q: "Crane Hand Signals", a: "OSHA Subpart CC, 1926.1425" },
+        { q: "Rigging Equipment (Slings, Shackles)", a: "OSHA Subpart H, 1926.251" },
+        { q: "Fire Extinguishers (Placement, Rating)", a: "OSHA Subpart F, 1926.150" },
+        { q: "Assembly Occupancies (A-1 to A-5)", a: "IBC, Section 303" },
+        { q: "High-Hazard Group H", a: "IBC, Section 307" },
+        { q: "Institutional Group I", a: "IBC, Section 308" },
+        { q: "Residential Group R", a: "IBC, Section 310" },
+        { q: "Allowable Building Heights", a: "IBC, Table 504.3" },
+        { q: "Allowable Number of Stories", a: "IBC, Table 504.4" },
+        { q: "Fire-Resistance Rating Requirements (Building Elements)", a: "IBC, Table 601" },
+        { q: "Fire-Resistance Rating Requirements (Exterior Walls)", a: "IBC, Table 602" },
+        { q: "Means of Egress Sizing (Occupant Load)", a: "IBC, Section 1004" },
+        { q: "Stairway Width and Capacity", a: "IBC, Section 1011" },
+        { q: "Handrails (Egress)", a: "IBC, Section 1014" },
+        { q: "Concrete Mix Design (IBC Requirements)", a: "IBC, Section 1904/1905" },
+        { q: "Climatic and Geographic Design Criteria", a: "IRC, Table R301.2(1)" },
+        { q: "Fire-Resistant Construction (Dwelling/Garage Separation)", a: "IRC, Section R302.6" },
+        { q: "Light, Ventilation, Heating (Habitable Rooms)", a: "IRC, Section R303" },
+        { q: "Minimum Room Areas", a: "IRC, Section R304" },
+        { q: "Ceiling Height", a: "IRC, Section R305" },
+        { q: "Emergency Escape and Rescue Openings", a: "IRC, Section R310" },
+        { q: "Means of Egress (Hallways, Doors)", a: "IRC, Section R311" },
+        { q: "Fastening Schedule (Nailing Table)", a: "IRC, Table R602.3(1)" },
+        { q: "Wood Wall Framing (Studs, Headers)", a: "IRC, Section R602" },
+        { q: "Roof Coverings (Underlayment, Flashing)", a: "IRC, Section R905" },
+        { q: "Organizing for Quality (Quality Control & Record Keeping)", a: "Concrete, Chapter 1" },
+        { q: "Concrete Specification (Strength, Slump, Admixtures)", a: "Concrete, Chapter 3" },
+        { q: "Common Field Problems (Cracking, Blistering, Curling)", a: "Concrete, Chapter 1" },
+        { q: "Building Planning (Light, Ventilation, Sanitation)", a: "IRC, Chapter 3" },
+        { q: "Wall Construction (Steel, Wood, Masonry)", a: "IRC, Chapter 6" },
+        { q: "Roof Assemblies (Coverings, Flashings)", a: "IRC, Chapter 9" },
+        { q: "Energy Efficiency (Residential Envelope)", a: "IRC, Chapter 11" },
+        { q: "Mechanical Administration (Permits, Inspections)", a: "IRC, Chapter 12" },
+        { q: "Vents (Plumbing Venting Systems)", a: "IRC, Chapter 31" },
+        { q: "Electrical Definitions (Residential)", a: "IRC, Chapter 35" },
+        { q: "Wiring Methods (Residential)", a: "IRC, Chapter 38" },
+        { q: "Swimming Pools (Electrical Requirements)", a: "IRC, Chapter 42" },
+        { q: "Special Detailed Requirements Based on Use and Occupancy", a: "IBC, Chapter 4" },
+        { q: "Interior Finishes (Flame Spread, Smoke Development)", a: "IBC, Chapter 8" },
+        { q: "Means of Egress (Exits, Stairways, Handrails)", a: "IBC, Chapter 10" },
+        { q: "Roof Assemblies and Rooftop Structures", a: "IBC, Chapter 15" },
+        { q: "Soils and Foundations (Excavation, Grading, Fill)", a: "IBC, Chapter 18" },
+        { q: "Concrete (Design, Construction, Shotcrete)", a: "IBC, Chapter 19" },
+        { q: "Masonry (Design, Construction, Fireplaces)", a: "IBC, Chapter 21" },
+        { q: "Steel (Structural Steel, Joists, Decking)", a: "IBC, Chapter 22" },
+        { q: "Wood (Design, Connectors, Decay Control)", a: "IBC, Chapter 23" },
+        { q: "Glass and Glazing (Safety Glazing, Skylights)", a: "IBC, Chapter 24" },
+        { q: "Safeguards During Construction", a: "IBC, Chapter 33" },
+        { q: "Site Preparation (Clearing, Layout)", a: "Pipe & Exc., Chapter 4" },
+        { q: "Installing Water Systems (Thrust, Pressure)", a: "Pipe & Exc., Chapter 7" },
+        { q: "Clay Masonry Materials (Brick Manufacture, Properties)", a: "Masonry, Chapter 7" },
+        { q: "Concrete Masonry Units (Block Types, Classifications)", a: "Masonry, Chapter 8" },
+        { q: "Stone (Classification, Patterns)", a: "Masonry, Chapter 9" },
+        { q: "Wall Systems (Composite, Cavity, Veneer)", a: "Masonry, Chapter 16" },
+        { q: "Paving and Masonry Construction Details (Fireplaces)", a: "Masonry, Chapter 17" },
+        { q: "Form Construction (Materials, Maintenance)", a: "Masonry, Chapter 19" },
+        { q: "Acoustical Ceiling Design and Application", a: "Gypsum, Chapter 9" },
+        { q: "System Design Considerations (Fire/Sound Tests)", a: "Gypsum, Chapter 10" },
+        { q: "Problems, Remedies, and Preventive Measures", a: "Gypsum, Chapter 12" },
+        { q: "Building Sciences (Heat Transfer, Sound Transmission)", a: "Gypsum, Chapter 15" },
+        { q: "Site Layout and Control (Points of delivery, material storage, site drainage)", a: "Construction Jobsite Management, Chapter 6" },
+
+        // Part 2: Paired Q&A entries (Sources 193-1034)
+        { q: "What is the minimum end bearing for K-Series Open Web Steel Joists on masonry supports?", a: "Steel Joists, Chapter 5 (Erection of K-Series Joists) – 4 inches" },
+        { q: "Fire-Resistance Rated Control Joints (Installation details for 1-hour and 2-hour systems)", a: "Gypsum, Chapter 10 (System Design Considerations) or GA-234" },
+        { q: "Identifying Soil Types (Visual and Manual Tests for Type A, B, C soils)", a: "Pipe & Exc., Chapter 6 (Soil Compaction) & OSHA Subpart P, Appendix A" },
+        { q: "What is the maximum vertical rise for a single flight of stairs before a landing is required?", a: "Carpentry, Chapter 25 (Stairways), Section 25.1 – 12 feet (147 inches in IRC)" },
+        { q: "Concrete Curing Methods (Water curing, sealing compounds, waterproof paper)", a: "Concrete, Chapter 11 (Concrete Placement and Finishing)" },
+        { q: "General Plumbing Requirements (Structural protection, piping protection)", a: "IRC, Chapter 26" },
+        { q: "What is the minimum overlap for vertical rebar splices in a masonry wall?", a: "Masonry, Chapter 11 (Anchors, Ties, and Reinforcement) – Typically 30 bar diameters (check local code/specs)" },
+        { q: "Estimating Brick Masonry (Calculating mortar yield and brick quantities)", a: "Masonry, Chapter 6 (Math for Masonry Careers), Section 6.9" },
+        { q: "Managing Project Costs (Labor, Material, Equipment cost control)", a: "Construction Jobsite Management, Chapter 12" },
+        { q: "How many days of compressive strength results are required for the 'Field Experience' method of concrete mix design?", a: "Concrete, Chapter 3 (Concrete Specification) – 30 consecutive tests (or fewer with modification factors)" },
+        { q: "Minimum ventilation area required for attics (Ratio 1/150 vs 1/300)", a: "IRC Chapter 8 (R806)" },
+        { q: "Truss Erection Safety (Hoisting, toe-nailing, spreader bars)", a: "BCSI, Section B1 (Hoisting & Handling)" },
+        { q: "What is the maximum span for 5/8 inch drywall on a ceiling when water-based texture is applied?", a: "Gypsum, Chapter 2 (Framing), Table: Maximum Frame Spacing – 16 inches o.c. (if perpendicular)" },
+        { q: "Rigging Equipment for Material Handling (Sling capacities, shackles, hooks)", a: "OSHA, Subpart H (1926.251)" },
+        { q: "Installing Windows and Skylights (Flashing, rough openings)", a: "Carpentry, Chapter 20" },
+        { q: "What is the minimum thickness for a concrete slab-on-ground?", a: "Concrete, Chapter 8 (Joints/Reinforcement for Slabs-on-Ground) – 3.5 inches (IRC R506)" },
+        { q: "Electrical Service Requirements (Clearances, grounding, service size)", a: "IRC, Chapter 36 (Services)" },
+        { q: "According to the 'MaSoN wOrK' mnemonic, which mortar type has the highest compressive strength?", a: "Masonry, Chapter 10 (Mortar and Grout) – Type M (2,500 psi)" },
+        { q: "Steel Deck Installation (Fastening patterns, side laps, end laps)", a: "Steel Deck, Section 'Installation'" },
+        { q: "What is the '10-foot rule' regarding crane operations?", a: "OSHA, Subpart CC (Cranes) – Minimum clearance from power lines up to 50kV" },
+        { q: "Installing Exterior Insulation and Finish Systems (EIFS)", a: "Gypsum, Chapter 3 (Cladding)" },
+        { q: "What is the maximum moisture content for lumber to be used in framing?", a: "Carpentry, Chapter 12 (Wood as a Building Material) – 19%" },
+        { q: "Means of Egress (Exit access, discharge, travel distance)", a: "IBC, Chapter 10" },
+        { q: "Concrete Joint Types (Contraction, Isolation, Construction)", a: "Concrete, Chapter 7 (Joints and Embedments)" },
+        { q: "What is the minimum lap for underlayment on a roof slope between 2:12 and 4:12?", a: "IRC, Chapter 9 – 19 inches (double layer)" },
+        { q: "Trenching Safety (Shoring, shielding, sloping requirements)", a: "Pipe & Exc., Chapter 11 (Safety) or OSHA Subpart P" },
+        { q: "Calculating Board Feet (Formula and estimation)", a: "Carpentry, Chapter 2 (Building Codes & Planning) - Section 2.4 Estimating" },
+        { q: "Changes and Claims (Change orders, disputes, documentation)", a: "Construction Jobsite Management, Chapter 15" },
+        { q: "What is the maximum slump allowed for concrete if not specified by the design professional?", a: "Concrete, Chapter 3 – 4 inches (typically)" },
+        { q: "Wall Covering (Siding, Veneer, Plaster)", a: "IRC, Chapter 7" },
+        { q: "What is the primary purpose of a 'screed' in concrete finishing?", a: "Masonry, Chapter 20 (Concrete Flatwork) – To strike off excess concrete and bring the surface to the proper grade" },
+        { q: "Interior Patching and Repairing (Gypsum board repair methods)", a: "Gypsum, Chapter 5, Section 'Interior Patching and Repairing'" },
+        { q: "What is the minimum curing temperature for concrete to prevent freezing?", a: "Concrete, Chapter 11 – 50°F" },
+        { q: "Sanitary Drainage (Piping, fittings, cleanouts)", a: "IRC, Chapter 30" },
+        { q: "Diagonal Bracing for Web Members (Permanent bracing)", a: "BCSI Guide, Section B3 (Permanent Restraint/Bracing of Chords & Web Members)" },
+        { q: "What is the standard height for a kitchen base cabinet?", a: "Carpentry, Chapter 27 (Cabinets) – 34.5 inches (without countertop) or 36 inches (finished height)" },
+        { q: "Accessibility (Ramps, elevators, accessible routes)", a: "IBC, Chapter 11" },
+        { q: "Types of Construction (Type I - V fire resistance)", a: "IBC, Chapter 6" },
+        { q: "Which document provides the 'Standard Specification for Agencies Engaged in Construction Inspection and/or Testing'?", a: "IBC, ASTM E329 (Referenced in Chapter 17)" },
+        { q: "Wall Systems (Cavity walls, composite walls, veneers)", a: "Masonry, Chapter 16" },
+        { q: "What is the maximum horizontal spacing for wall ties in a masonry cavity wall?", a: "Masonry, Chapter 11 or IBC Chapter 21 – Typically 24 inches or 36 inches depending on tie type/code" },
+        { q: "Project Closeout (Punch list, warranties, final payment)", a: "Construction Jobsite Management, Chapter 17" },
+        { q: "Excavation in Rock (Drilling, blasting, equipment)", a: "Pipe & Exc., Chapter 10" },
+        { q: "What is the tolerance for the variation in slab thickness?", a: "Concrete, Chapter 11 – -1/4 inch to +3/8 inch" },
+        { q: "Methods for Applying Drywall and Veneer Bases (Single-ply, Multi-ply)", a: "Gypsum, Chapter 3" },
+        { q: "What is the maximum spacing for control joints in exterior ceilings and soffits?", a: "Gypsum, Chapter 10 (System Design Considerations) — 30 feet" },
+        { q: "Preparing for Concreting (Pre-placement checklist, excavation, subgrade)", a: "Concrete, Chapter 10" },
+        { q: "What is the minimum temperature for maintaining concrete during the protection period in cold weather (Sections < 12 inches)?", a: "Concrete, Chapter 11 — 55°F" },
+        { q: "Excavations (General requirements, protective systems)", a: "OSHA, Subpart P" },
+        { q: "According to OSHA, at what depth does a trench require a specific means of egress (ladder/ramp)?", a: "OSHA, Subpart P (1926.651(c)(2)) — 4 feet" },
+        { q: "Laying Brick (Basic operations, Leads, Corners)", a: "Masonry, Chapter 12" },
+        { q: "What is the recommended mortar type for masonry subjected to high lateral loads or below-grade use (High Strength)?", a: "Masonry, Chapter 10 (Mortar and Grout) — Type M" },
+        { q: "Roof Assemblies and Rooftop Structures (Fire classification, materials)", a: "IBC, Chapter 15" },
+        { q: "What is the minimum net free ventilating area for attics (standard requirement)?", a: "IBC, Chapter 12 (1202.2) or IRC Chapter 8 (R806.2) — 1/150 of the area of the vented space" },
+        { q: "Erection of Deck and Job Site Safety", a: "Steel Deck, Section 6" },
+        { q: "What is the minimum end bearing for steel floor deck installed on structural steel?", a: "Steel Deck, Section 6 (Installation instructions) — 1-1/2 inches" },
+        { q: "Site Preparation (Clearing, Grubbing, Layout)", a: "Pipe & Exc., Chapter 4" },
+        { q: "How do you calculate the volume of a trench (Bank Cubic Yards)?", a: "Pipe & Exc., Chapter 2 (Crew & Equipment Productivity) — Length × Width × Depth ÷ 27" },
+        { q: "Wall Construction (Framing, Headers, Bracing)", a: "IRC, Chapter 6" },
+        { q: "What is the minimum thickness of a masonry fireplace hearth slab?", a: "IRC, Chapter 10 (Masonry Fireplaces) — 4 inches" },
+        { q: "Chimneys and Fireplaces (Construction details)", a: "Carpentry, Chapter 24 (or 29 in some editions regarding specialized masonry) / IRC Chapter 10" },
+        { q: "What is the minimum distance a chimney must extend above the highest point where it passes through the roof?", a: "Carpentry, Chapter 22 or IRC Chapter 10 — 3 feet (and 2 feet above any part of the building within 10 feet)" },
+        { q: "Joint Treatment for Drywall Construction (Compounds, Tape)", a: "Gypsum, Chapter 5" },
+        { q: "Which level of drywall finish is recommended for areas to receive gloss, semi-gloss, or enamel paints?", a: "Gypsum, Chapter 5 (Levels of Finish) — Level 5" },
+        { q: "Design of Forms (Loads, Pressure formulas)", a: "Concrete, Chapter 5" },
+        { q: "When vibration is used to consolidate concrete, how much is the lateral pressure on formwork generally increased or decreased compared to hand spading?", a: "Concrete, Chapter 5 — It is increased (concrete acts more like a fluid)" },
+        { q: "Rigging Equipment for Material Handling (Slings, Chains, Hooks)", a: "OSHA, Subpart H" },
+        { q: "When using wire rope clips (Crosby clips) to form an eye, how must the U-bolt be applied?", a: "OSHA, Subpart H (1926.251) — The U-bolt must be on the dead (short) end of the rope ('Never saddle a dead horse')" },
+        { q: "Sanitary Drainage (Piping materials, Joints, Cleanouts)", a: "IRC, Chapter 30" },
+        { q: "What is the maximum distance between cleanouts on a 4-inch building sewer?", a: "IRC, Chapter 30 (Section P3005.2) — 100 feet" },
+        { q: "Handling and Erection of Steel Joists (Safety, Tagging, Loading)", a: "Steel Joists" },
+        { q: "When erecting K-Series joists, what is the minimum bearing length on a steel plate?", a: "Steel Joists, Chapter 5 — 2-1/2 inches" },
+        { q: "Means of Egress (Occupant load, Width, Doors)", a: "IBC, Chapter 10" },
+        { q: "In a commercial building, which way must egress doors swing if the occupant load is 50 or more?", a: "IBC, Chapter 10 (1010.1.2.1) — In the direction of egress travel" },
+        { q: "Concrete Flatwork and Formed Shapes (Finishing, Curing)", a: "Masonry, Chapter 20" },
+        { q: "What is 'screeding' in the context of concrete work?", a: "Masonry, Chapter 20 or Contractor'sGuide — Striking off excess concrete to bring the surface to the proper grade" },
+        { q: "Exterior Walls (Weather protection, Fire resistance)", a: "IBC, Chapter 14" },
+        { q: "What is the minimum overlap for water-resistive barrier (felt) layers applied horizontally?", a: "IBC, Chapter 14 (1403.2) — 2 inches" },
+        { q: "Vents (Plumbing vent systems)", a: "IRC, Chapter 31" },
+        { q: "How far must a plumbing vent terminal extend above the roof?", a: "IRC, Chapter 31 (P3103.1) — 6 inches (or greater depending on snow load)" },
+        { q: "Electrical Definitions (Voltage, Ampacity, Service)", a: "IRC, Chapter 35" },
+        { q: "What is the maximum number of disconnects allowed for a service entrance?", a: "IRC, Chapter 36 (E3601.7) — Six" },
+        { q: "Interior Finishes (Gypsum, Plaster, Texture)", a: "Carpentry, Chapter 32" },
+        { q: "What is the standard thickness of drywall used for a single-layer application on studs 16 inch o.c.?", a: "Carpentry, Chapter 32 or Gypsum Handbook — 1/2 inch" },
+        { q: "What are the three basic methods for testing the bearing capacity of soil (e.g., Penny test, Shelf test)?", a: "Pipe & Exc., Chapter 6 (Soil Compaction)" },
+        { q: "According to the 'MaSoN wOrK' scale, which mortar type has the lowest compressive strength (350 psi)?", a: "Masonry, Chapter 10 (Mortar and Grout), Section 10.5" },
+        { q: "What is the maximum height of a rolling scaffold in relation to its minimum base dimension?", a: "OSHA, Subpart L (Scaffolds), 1926.452(w) — 4:1 ratio" },
+        { q: "Requirements for 'High-Efficacy Lamps' in residential lighting.", a: "IRC, Chapter 11 (Energy Efficiency), Section N1104.1" },
+        { q: "Handling, transporting, and storing metal plate connected wood trusses.", a: "BCSI, Chapter B1" },
+        { q: "Procedures for 'Hot Weather Concreting' (cooling ingredients, preventing rapid evaporation).", a: "Concrete, Chapter 11 " },
+        { q: "Installation of acoustical ceiling grids and panels.", a: "Gypsum, Chapter 9" },
+        { q: "What is the minimum net clear opening width for an emergency escape and rescue window?", a: "IRC, Chapter 3 (Building Planning), Section R310 — 20 inches" },
+        { q: "Estimating the volume of a trench with sloped sides.", a: "Pipe & Exc., Chapter 9 (Estimating Surface Excavation)" },
+        { q: "Requirements for 'Controlled Decking Zones' (CDZ) during steel erection.", a: "OSHA, Subpart R (Steel Erection), 1926.760(c)" },
+        { q: "Levels of Gypsum Board Finish (Level 0 through Level 5).", a: "Gypsum, Chapter 5 (Finishing Drywall Systems)" },
+        { q: "Proper storage of steel joists at the job site (vertical vs. horizontal).", a: "Steel Joists, Chapter 4" },
+        { q: "Minimum thickness of a concrete footing projection.", a: "IRC, Chapter 4 (Foundations), Section R403 — 6 inches" },
+        { q: "Weep holes spacing in masonry veneer.", a: "Masonry, Chapter 11 or IRC Chapter 7 (Wall Covering) — Max 33 inches o.c." },
+        { q: "Rigging equipment inspection (slings, wire ropes).", a: "OSHA, Subpart H (Materials Handling), 1926.251" },
+        { q: "Recommended concrete slump for a 'heavy reinforced wall'.", a: "Concrete, Chapter 2 (Concrete Mix) — 3 to 4 inches (Table 2.3)" },
+        { q: "Minimum slope for a built-up roof.", a: "IBC, Chapter 15 (Roof Assemblies), Section 1507.10 — 1/4 unit vertical in 12 units horizontal" },
+        { q: "Types of fire extinguishers (Class A, B, C, D).", a: "OSHA, Subpart F (Fire Protection), 1926.150" },
+        { q: "Installation of 'Resilient Channels' for sound control.", a: "Gypsum, Chapter 2 (Framing) or Chapter 10" },
+        { q: "Maximum spacing of supports for 5/8 inch drywall on a ceiling (parallel application).", a: "Gypsum, Chapter 2 (Framing) — 16 inches o.c." },
+        { q: "Trench shield (trench box) usage requirements.", a: "Pipe & Exc., Chapter 11 or OSHA Subpart P" },
+        { q: "Fastening schedule for roof sheathing (nailing pattern).", a: "IRC, Chapter 6 (Wall Construction - Table R602.3(1)) or IBC Chapter 23" },
+        { q: "Concrete 'honeycombing' causes and prevention.", a: "Concrete, Chapter 12 (Common Field Problems)" },
+        { q: "Minimum bearing length for Open Web Steel Joists on a steel support.", a: "Steel Joists, Chapter 5 — 2 1/2 inches" },
+        { q: "'Type A' Soil unconfined compressive strength.", a: "OSHA, Subpart P, Appendix A — 1.5 tsf or greater" },
+        { q: "Flashing requirements for chimneys.", a: "IRC Chapter 10" },
+        { q: "Maximum travel distance to a fire extinguisher in a building under construction.", a: "OSHA, Subpart F, 1926.150(c) — 100 feet" },
+        { q: "Spacing of control joints in a concrete masonry wall.", a: "Masonry, Chapter 13 or 16 — Generally max 20-25 feet (depending on local code/design" },
+        { q: "Minimum overlap for vapor retarders under concrete slabs.", a: "Concrete, Chapter 8 — 6 inches" },
+        { q: "'Action Level' for lead exposure in construction.", a: "OSHA, Subpart D (Occupational Health), 1926.62 — 30 µg/m3" },
+        { q: "Framing an opening in a floor (Trimmers and Headers).", a: "Carpentry, Chapter 15 (Floor Framing)" },
+        { q: "Minimum temperature for applying joint compound.", a: "Gypsum, Chapter 5 — 50°F" },
+        { q: "Calculation of 'Board Feet'.", a: "Carpentry, Chapter 2 (or Reference Section) — (Thickness x Width x Length) / 144" },
+        { q: "Requirements for a 'Competent Person' in excavation.", a: "OSHA, Subpart P, 1926.650" },
+        { q: "Difference between 'Pre-tensioning' and 'Post-tensioning'.", a: "Masonry (Section 6 Concrete) or Contractor'sGuide to Quality Concrete" },
+        { q: "Minimum size of a copper grounding electrode conductor.", a: "IRC, Chapter 36 (Services) or Table 250.66" },
+        { q: "Steel deck fastening patterns (e.g., 36/4).", a: "Steel Deck, Section 6" },
+        { q: "Procedure for the 'Ball Bank' indicator test (slope/banking).", a: "Pipe & Exc., Chapter 3" },
+        { q: "Calculating the area of a gable end (triangle).", a: "Carpentry, Reference Section (Math) — 1/2 x Base x Height" },
+        { q: "Tolerance for variation in riser height for a flight of stairs.", a: "IRC, Chapter 3 (R311.7.5.1) — 3/8 inch" },
+        { q: "What is a 'Change Order'?", a: "Construction Jobsite Management, Chapter 15" },
+        { q: "Classification of hazardous materials (HMIS/NFPA labels).", a: "OSHA, Subpart D (Hazard Communication)" },
+        { q: "Methods for applying drywall and veneer bases (Single-ply, Multi-ply)", a: "Gypsum, Chapter 3" },
+        { q: "What is the maximum spacing for control joints in exterior ceilings and soffits?", a: "Gypsum, Chapter 10 (System Design Considerations) — 30 feet" },
+        { q: "Preparing for Concreting (Pre-placement checklist, excavation, subgrade)", a: "Concrete, Chapter 10" },
+        { q: "What is the minimum temperature for maintaining concrete during the protection period in cold weather (Sections < 12 inches)?", a: "Concrete, Chapter 11 — 55°F" },
+        { q: "Excavations (General requirements, protective systems)", a: "OSHA, Subpart P" },
+        { q: "According to OSHA, at what depth does a trench require a specific means of egress (ladder/ramp)?", a: "OSHA, Subpart P (1926.651(c)(2)) — 4 feet" },
+        { q: "Laying Brick (Basic operations, Leads, Corners)", a: "Masonry, Chapter 12" },
+        { q: "What is the recommended mortar type for masonry subjected to high lateral loads or below-grade use (High Strength)?", a: "Masonry, Chapter 10 (Mortar and Grout) — Type M" },
+        { q: "Roof Assemblies and Rooftop Structures (Fire classification, materials)", a: "IBC, Chapter 15" },
+        { q: "What is the minimum net free ventilating area for attics (standard requirement)?", a: "IBC, Chapter 12 (1202.2) or IRC Chapter 8 (R806.2) — 1/150 of the area of the vented space" },
+        { q: "Erection of Deck and Job Site Safety", a: "Steel Deck, Section 6" },
+        { q: "What is the minimum end bearing for steel floor deck installed on structural steel?", a: "Steel Deck, Section 6 (Installation instructions) — 1-1/2 inches" },
+        { q: "Site Preparation (Clearing, Grubbing, Layout)", a: "Pipe & Exc., Chapter 4" },
+        { q: "How do you calculate the volume of a trench (Bank Cubic Yards)?", a: "Pipe & Exc., Chapter 2 (Crew & Equipment Productivity) — Length × Width × Depth ÷ 27" },
+        { q: "Wall Construction (Framing, Headers, Bracing)", a: "IRC, Chapter 6" },
+        { q: "What is the minimum thickness of a masonry fireplace hearth slab?", a: "IRC, Chapter 10 (Masonry Fireplaces) — 4 inches" },
+        { q: "Chimneys and Fireplaces (Construction details)", a: "Carpentry, Chapter 24 (or 29 in some editions regarding specialized masonry) / IRC Chapter 10" },
+        { q: "What is the minimum distance a chimney must extend above the highest point where it passes through the roof?", a: "Carpentry, Chapter 22 or IRC Chapter 10 — 3 feet (and 2 feet above any part of the building within 10 feet)" },
+        { q: "Joint Treatment for Drywall Construction (Compounds, Tape)", a: "Gypsum, Chapter 5" },
+        { q: "Which level of drywall finish is recommended for areas to receive gloss, semi-gloss, or enamel paints?", a: "Gypsum, Chapter 5 (Levels of Finish) — Level 5" },
+        { q: "Design of Forms (Loads, Pressure formulas)", a: "Concrete, Chapter 5" },
+        { q: "When vibration is used to consolidate concrete, how much is the lateral pressure on formwork generally increased or decreased compared to hand spading?", a: "Concrete, Chapter 5 — It is increased (concrete acts more like a fluid)" },
+        { q: "Rigging Equipment for Material Handling (Slings, Chains, Hooks)", a: "OSHA, Subpart H" },
+        { q: "When using wire rope clips (Crosby clips) to form an eye, how must the U-bolt be applied?", a: "OSHA, Subpart H (1926.251) — The U-bolt must be on the dead (short) end of the rope ('Never saddle a dead horse')" },
+        { q: "Sanitary Drainage (Piping materials, Joints, Cleanouts)", a: "IRC, Chapter 30" },
+        { q: "What is the maximum distance between cleanouts on a 4-inch building sewer?", a: "IRC, Chapter 30 (Section P3005.2) — 100 feet" },
+        { q: "Handling and Erection of Steel Joists (Safety, Tagging, Loading)", a: "Steel Joists" },
+        { q: "When erecting K-Series joists, what is the minimum bearing length on a steel plate?", a: "Steel Joists, Chapter 5 — 2-1/2 inches" },
+        { q: "Means of Egress (Occupant load, Width, Doors)", a: "IBC, Chapter 10" },
+        { q: "In a commercial building, which way must egress doors swing if the occupant load is 50 or more?", a: "IBC, Chapter 10 (1010.1.2.1) — In the direction of egress travel" },
+        { q: "Concrete Flatwork and Formed Shapes (Finishing, Curing)", a: "Masonry, Chapter 20" },
+        { q: "What is 'screeding' in the context of concrete work?", a: "Masonry, Chapter 20 or Contractor'sGuide — Striking off excess concrete to bring the surface to the proper grade" },
+        { q: "Exterior Walls (Weather protection, Fire resistance)", a: "IBC, Chapter 14" },
+        { q: "What is the minimum overlap for water-resistive barrier (felt) layers applied horizontally?", a: "IBC, Chapter 14 (1403.2) — 2 inches" },
+        { q: "Vents (Plumbing vent systems)", a: "IRC, Chapter 31" },
+        { q: "How far must a plumbing vent terminal extend above the roof?", a: "IRC, Chapter 31 (P3103.1) — 6 inches (or greater depending on snow load)" },
+        { q: "Electrical Definitions (Voltage, Ampacity, Service)", a: "IRC, Chapter 35" },
+        { q: "What is the maximum number of disconnects allowed for a service entrance?", a: "IRC, Chapter 36 (E3601.7) — Six" },
+        { q: "Interior Finishes (Gypsum, Plaster, Texture)", a: "Carpentry, Chapter 32" },
+        { q: "What is the standard thickness of drywall used for a single-layer application on studs 16 inch o.c.?", a: "Carpentry, Chapter 32 or Gypsum Handbook — 1/2 inch" },
+        { q: "Methods of 'Backfilling' trenches (compaction layers, water jetting).", a: "Pipe & Exc., Chapter 8 (Installing Sewer & Stormwater Systems)" },
+        { q: "What is the maximum allowable exposure to impulse or impact noise (dB peak)?", a: "OSHA, Subpart D (Occupational Health and Environmental Controls), 1926.52 — 140 dB" },
+        { q: "Engineered Wood Products (Glulam, LVL, PSL, I-Joists).", a: "Carpentry, Chapter 13" },
+        { q: "What is the minimum bearing length for a wood floor joist on masonry?", a: "IRC, Chapter 5 (Floors), Section R502.6 — 3 inches" },
+        { q: "Installing 'Resilient Channel' to reduce sound transmission in walls.", a: "Gypsum, Chapter 10 or Chapter 2 (Framing)" },
+        { q: "Requirements for 'Toilet and Bathing Facilities' (minimum counts) in commercial buildings.", a: "IBC, Chapter 29 (Plumbing Systems)" },
+        { q: "'Hot Weather' masonry construction requirements (temperature limits for mortar).", a: "Masonry, Chapter 10 (Mortar and Grout) or TMS 602 — Mortar must be between 40°F and 120°F" },
+        { q: "How often must a crane be inspected by a competent person during use?", a: "OSHA, Subpart CC (Cranes), 1926.1412 — Each shift" },
+        { q: "Calculating 'Volume of Concrete' for a circular column (V = πr²h).", a: "Carpentry, Chapter 8 or Reference Section" },
+        { q: "'Weep Screed' installation requirements for exterior plaster/stucco.", a: "IBC, Chapter 25 (Gypsum Board, Gypsum Panel Products and Plaster), Section 2512" },
+        { q: "'Diagonal Bracing' for wood trusses (Permanent Web Member Bracing).", a: "BCSI, Section B3" },
+        { q: "Acceptable 'Drilling and Notching' limits for studs in exterior walls.", a: "IRC, Chapter 6 (Wall Construction), Section R602.6" },
+        { q: "'Air-Entraining Admixtures' (Purpose and effects on concrete).", a: "Concrete, Chapter 2 (Concrete Mix)" },
+        { q: "What is the minimum width of a walkway on a scaffold?", a: "OSHA, Subpart L (Scaffolds), 1926.451(b) — 18 inches" },
+        { q: "Fire-Resistance Ratings for 'Corridors' (Table 1020.1).", a: "IBC, Chapter 10 (Means of Egress)" },
+        { q: "'Slump Cone' dimensions (Height, Base Diameter, Top Diameter).", a: "Concrete, Chapter 2 (Control Tests) — 12 inch H, 8 inch Base, 4 inch Top" },
+        { q: "'Efflorescence' removal techniques from masonry.", a: "Masonry, Chapter 12 (Laying Brick) or Chapter 7 (Clay Masonry Materials)" },
+        { q: "'Barricades' for traffic control on job sites (Type I, II, III).", a: "OSHA, Subpart G (Signs, Signals, and Barricades)" },
+        { q: "'Ice Barrier' underlayment requirements for asphalt shingles.", a: "IRC, Chapter 9 (Roof Assemblies), Section R905.1.2" },
+        { q: "'Gypsum Sheathing' application (weather exposure).", a: "Gypsum, Chapter 3 (Cladding)" },
+        { q: "Allowable 'Deflection' limits for floor members (L/360).", a: "IBC, Chapter 16 (Structural Design), Table 1604.3" },
+        { q: "'Laser Level' operation and safety.", a: "Pipe & Exc., Chapter 3 or Carpentry Chapter 4" },
+        { q: "'Hydrostatic Pressure' effects on foundations.", a: "Concrete, Chapter 4 (Foundations) or Masonry Ch 15" },
+        { q: "Maximum 'Soil Slope' for Type B soil (1:1).", a: "OSHA, Subpart P, Appendix B" },
+        { q: "'Glass Block' installation (Mortar joints, reinforcement).", a: "Masonry, Chapter 13 or IBC Chapter 21" },
+        { q: "'Roof Ventilation' calculation (1/150 rule).", a: "Carpentry, Chapter 22 or IRC Chapter 8" },
+        { q: "'Sump Pumps' and sewage ejectors.", a: "IRC, Chapter 30 (Sanitary Drainage)" },
+        { q: "'Asbestos' exposure limits (PEL) in construction.", a: "OSHA, Subpart Z (Toxic and Hazardous Substances), 1926.1101 — 0.1 f/cc" },
+        { q: "'Stairway Lighting' requirements.", a: "IRC, Chapter 3 (Section R303.7)" },
+        { q: "'Steel Joist' unloading and handling (vertical vs flat).", a: "Steel Joists, Chapter 3" },
+        { q: "'Vapor Retarders' classes (Class I, II, III).", a: "IRC, Chapter 7 (Wall Covering) or IBC Chapter 14" },
+        { q: "'Fireblocking' locations in wood-frame construction.", a: "IRC, Chapter 3 (R302.11) or IBC Chapter 7" },
+        { q: "'Tuckpointing' definition and procedure.", a: "Masonry, Chapter 10 (Mortar) or 12" },
+        { q: "'Safety Nets' placement requirements (distance below working level).", a: "OSHA, Subpart M (Fall Protection), 1926.502(c) — Never more than 30 feet below" },
+        { q: "'Concrete Segregation' causes (Over-vibration, high drop).", a: "Concrete, Chapter 12 (Common Field Problems)" },
+        { q: "'Glazing' near doors (Hazardous locations).", a: "IRC, Chapter 3 (R308) or IBC Chapter 24" },
+        { q: "'Soil Swell' (Bulking factor) calculation.", a: "Pipe & Exc., Chapter 9 (Estimating)" },
+        { q: "According to BCSI, what is the maximum stack height for gypsum board when acting as a construction load on trusses?", a: "BCSI, B4 (Construction Loading) — 12 inches" },
+        { q: "What is the specific dimension of the tamping rod used for the slump test (diameter and length)?", a: "Concrete, Chapter 2 (Control Tests) — 5/8 inch diameter, 24 inch length (hemispherical tip)" },
+        { q: "In steel joist erection, for spans greater than 60 feet, what type of bridging must be installed before hoisting cables are released?", a: "Steel Joists, Chapter 6 — Bolted Diagonal Bridging" },
+        { q: "What is the maximum vertical spacing for wall ties in a brick veneer wall with wood stud backing?", a: "Masonry, Chapter 11 (Anchors, Ties, and Reinforcement) — 18 inches (or 24 inches depending on specific code/tie type, typically 16-24 inches)" },
+        { q: "What is the minimum thickness for a concrete slab on grade to prevent curling and cracking (general recommendation)?", a: "Concrete, Chapter 8 — 3.5 inches (minimum)" },
+        { q: "According to the Gypsum, what is the maximum spacing of control joints in a long continuous partition wall?", a: "Gypsum, Chapter 10 (System Design Considerations) — 30 feet" },
+        { q: "What is the maximum allowable sling angle (from horizontal) before the rated capacity is significantly reduced and considered dangerous?", a: "OSHA Subpart H (Rigging Equipment) — 30 degrees (Angles less than 30° are generally not recommended)." },
+        { q: "What is the minimum net clear opening height for an emergency escape and rescue opening (EERO)?", a: "IRC, Chapter 3 (Building Planning), Section R310 — 24 inches" },
+        { q: "When testing soil, if a sample can be rolled into a thread 1/8 inch thick without crumbling, it is considered:", a: "Pipe & Exc., Chapter 6 (Soil Compaction) or OSHA Subpart P — Cohesive" },
+        { q: "What is the minimum end bearing for a steel floor deck on concrete or masonry?", a: "Steel Deck, Section 6 — 2 inches (Note: it is 1.5 inches on steel)." },
+        { q: "According to Masonry, what is the primary purpose of a 'Soldier Course' in a brick wall?", a: "Masonry, Chapter 12 (Laying Brick) — Decorative (or to serve as a lintel/coping)" },
+        { q: "What is the maximum travel distance to a fire extinguisher on a construction jobsite?", a: "OSHA Subpart F (Fire Protection) — 100 feet" },
+        { q: "Calculating the volume of a trench: If a trench is 100 ft long, 4 ft wide, and 5 ft deep, what is the volume in Cubic Yards?", a: "Pipe & Exc., Chapter 9 (Estimating Surface Excavation) — 74.07 CY (100x4x5 = 2000; 2000/27 = 74.07)" },
+        { q: "Which ASTM standard governs the specification for 'Mortar for Unit Masonry'?", a: "Masonry, Chapter 10 (Mortar and Grout) — ASTM C270" },
+        { q: "What is the minimum distance a scaffold plank must extend over its support?", a: "OSHA Subpart L (Scaffolds) — 6 inches" },
+        { q: "According to the 'MaSoN wOrK' scale, which mortar type has high compressive strength but lower bond and workability?", a: "Masonry, Chapter 10 — Type M" },
+        { q: "When installing drywall on a ceiling perpendicular to framing, what is the maximum spacing for 1/2 inch panels?", a: "Gypsum, Chapter 2 (Framing) — 24 inches o.c. (if water-based texture is NOT used; 16 inches if it is)." },
+        { q: "In a framing square layout for stairs, what do the numbers on the tongue and blade represent?", a: "Carpentry, Chapter 25 — Rise and Run" },
+        { q: "What is the purpose of 'Air-Entrainment' in concrete?", a: "Concrete, Chapter 2 — To improve freeze-thaw resistance" },
+        { q: "According to IRC, what is the minimum width of a hallway?", a: "IRC, Chapter 3 (Building Planning) — 36 inches" },
+        { q: "For steel deck, what is the standard 'side lap' fastening requirement?", a: "Steel Deck — Button Punch, Screw, or Weld (as specified by design)" },
+        { q: "What is the minimum compressive strength (psi) of Type S mortar?", a: "Masonry, Chapter 10 — 1800 psi" },
+        { q: "In roofing, what is the minimum slope for installing asphalt shingles with standard underlayment?", a: "IRC Chapter 9 — 4:12 (2:12 to 4:12 requires double underlayment)." },
+        { q: "What is the maximum height of a fall before fall protection is required in general construction?", a: "OSHA Subpart M — 6 feet" },
+        { q: "Which document provides the 'Standard Specification for Gypsum Board'?", a: "Gypsum, Appendix — ASTM C1396" },
+        { q: "How often must a competent person inspect an excavation?", a: "Pipe & Exc., Chapter 11 or OSHA Subpart P — Daily and after rainstorms." },
+        { q: "What is the minimum diameter of a weep hole in masonry construction?", a: "Masonry, Chapter 11 — 3/16 inch" },
+        { q: "When dealing with hazardous materials, what does 'SDS' stand for?", a: "OSHA Subpart D — Safety Data Sheet" },
+        { q: "In concrete finishing, what is the purpose of 'bull floating'?", a: "Concrete, Chapter 11 — To eliminate high and low spots and embed large aggregate." },
+        { q: "What is the minimum bearing length for a wood joist resting on a wood or metal plate?", a: "Carpentry, Chapter 15 or IRC R502 — 1.5 inches" },
+        { q: "According to the IBC, what is the 'Use and Occupancy' classification for a restaurant with an occupant load of 50 or more?", a: "IBC, Chapter 3 — Group A-2" },
+        { q: "What is the maximum temperature for placing concrete in hot weather without special precautions?", a: "Concrete, Chapter 11 — Generally 90°F to 95°F" },
+        { q: "What is the purpose of 'chamfer strips' in concrete formwork?", a: "Concrete, Chapter 5 — To produce beveled edges on corners (preventing chipping)." },
+        { q: "What is the formula for calculating Board Feet?", a: "Carpentry, Chapter 2 — (Thickness x Width x Length in inches) / 144" },
+        { q: "According to OSHA, at what depth must a trench be provided with a protective system (shoring/sloping)?", a: "OSHA Subpart P — 5 feet" },
+        { q: "According to the BCSI Guide, what is the maximum stack height for gypsum board when acting as a construction load on trusses?", a: "BCSI, B4 (Construction Loading) — 12 inches" },
+        { q: "In Concrete, what is the recommended minimum temperature for placing concrete in cold weather for sections less than 12 inches thick?", a: "Concrete, Chapter 11 — 55°F" },
+        { q: "According to Masonry, what is the primary application for Type O mortar?", a: "Masonry, Chapter 10 (Mortar and Grout) — Interior non-loadbearing walls or historic restoration (low strength/high flexibility)" },
+        { q: "What is the maximum total length of the 'work triangle' (sink, refrigerator, range) in a well-designed kitchen?", a: "Carpentry, Chapter 27 (Cabinets & Countertops) — 26 feet" },
+        { q: "Per OSHA Subpart H, what happens to the rated capacity of a sling as the sling angle (from horizontal) decreases?", a: "OSHA, Subpart H (Rigging Equipment) — The rated capacity decreases (tension increases)" },
+        { q: "In Pipe & Exc., what is the 'swell factor' used for?", a: "Pipe & Exc., Chapter 2 (Crew & Equipment Productivity) or Chapter 9 — To adjust the volume of soil from its bank (in-ground) state to its loose (excavated) state." },
+        { q: "According to the Gypsum, what level of finish is required for areas where severe lighting conditions exist and gloss paints will be used?", a: "Gypsum, Chapter 5 (Finishing Drywall Systems) — Level 5 (Skim Coat)" },
+        { q: "What is the minimum bearing length for a wood floor joist resting on a masonry wall?", a: "IRC, Chapter 5 (Floors) — 3 inches" },
+        { q: "According to Steel Joists, for joist spans greater than 60 feet, what must be installed before the hoisting cables are released?", a: "Steel Joists, Chapter 6 — Bolted Diagonal Bridging" },
+        { q: "What is the specific purpose of a 'retarding admixture' in concrete?", a: "Concrete, Chapter 2 (Concrete Mix) — To delay the setting time (useful in hot weather)" },
+        { q: "What is the minimum net clear opening width for an emergency escape and rescue window?", a: "IRC, Chapter 3 (Building Planning) — 20 inches" },
+        { q: "According to Masonry, which brick bond consists of alternating headers and stretchers in every course?", a: "Masonry, Chapter 12 (Laying Brick) — Flemish Bond" },
+        { q: "According to OSHA Subpart P, what is the maximum depth a trench can be before a protective system (shoring/sloping) is mandatory?", a: "OSHA, Subpart P (Excavations) — 5 feet" },
+        { q: "In Pipe & Exc., how is 'cut' defined in earthwork calculations?", a: "Pipe & Exc., Chapter 9 — Excavating material to lower the grade to a desired elevation." },
+        { q: "What is the minimum lap for horizontal rebar splices in a masonry wall?", a: "Masonry, Chapter 11 (Anchors, Ties, and Reinforcement) — Typically 30 bar diameters or 12 inches (whichever is greater)" },
+        { q: "What is the maximum moisture content for lumber to be used in framing to prevent excessive shrinkage?", a: "Carpentry, Chapter 12 (Wood as a Building Material) — 19%" },
+        { q: "In Gypsum, what is the maximum spacing for control joints in an exterior ceiling (soffit)?", a: "Gypsum, Chapter 10 (System Design Considerations) — 30 feet" },
+        { q: "What is the primary cause of 'honeycombing' in concrete?", a: "Concrete, Chapter 12 (Common Field Problems) — Improper consolidation (vibration) or leakage of paste through forms." },
+        { q: "According to OSHA Subpart CC, who is responsible for determining if the ground conditions are firm and drained enough for crane operations?", a: "OSHA Subpart CC — The Controlling Entity" },
+        { q: "According to the IBC, what is the 'Use and Occupancy' classification for a K-12 school?", a: "IBC, Chapter 3 — Group E (Educational)" },
+        { q: "What is the minimum slope for a standing seam metal roof without sealant (typically)?", a: "IBC Chapter 15 — 1/4:12 (with sealant) or 2:12 (without, depending on manufacturer) Note: Generally 2:12 is the threshold for many metal systems." },
+        { q: "In Masonry, what is 'efflorescence'?", a: "Masonry, Chapter 7 or 12 — White powdery salt deposits on the face of masonry caused by moisture movement." },
+        { q: "According to OSHA Subpart L, scaffolds must be capable of supporting their own weight and how many times the maximum intended load?", a: "OSHA, Subpart L (Scaffolds) — 4 times" },
+        { q: "What is the standard height of a residential handrail?", a: "Carpentry, Chapter 25 or IRC R311 — 34 to 38 inches" },
+        { q: "According to Steel Joists, how should steel joists be stored on site?", a: "Steel Joists, Chapter 4 — Vertical (upright) or flat (if designed for it), but never laid flat on their sides if they are standard joists, to prevent bending." },
+        { q: "According to Gypsum, what fastener spacing is used for ceiling panels installed perpendicular to framing (screws)?", a: "Gypsum, Chapter 3 (Cladding) — 12 inches o.c." },
+        { q: "What is the minimum overlap for a ladder extending above a landing surface?", a: "OSHA Subpart X — 3 feet" },
+        { q: "In Concrete, what is the 'slump cone' dimensions?", a: "Contractor'sGuide, Chapter 2 — 12 inch height, 8 inch base, 4 inch top." },
+        { q: "According to BCSI, what is the purpose of a 'spreader bar' when lifting trusses?", a: "BCSI Summary Sheet — To distribute lifting forces and prevent lateral bending/buckling of the truss." },
+        { q: "In Masonry, what is the difference between a 'wythe' and a 'course'?", a: "Masonry, Chapter 7/12 — A course is a horizontal layer; a wythe is a vertical section/thickness of the wall." },
+        { q: "According to Pipe & Exc., what is a 'batter board'?", a: "Pipe & Exc., Chapter 3 — A temporary frame used to hold string lines for layout and grade." },
+        { q: "What is the maximum spacing of wall ties in a masonry veneer wall (residential)?", a: "IRC, Chapter 7 (R703) — 32 inches horizontally and 24 inches vertically (typically)." },
+        { q: "According to The Gypsum, what is 'joint photographing'?", a: "Gypsum, Chapter 12 (Problems) — The visibility of joint compound areas through the paint under certain lighting conditions." },
+        { q: "In Construction Jobsite Management, what is a 'punch list'?", a: "Construction Jobsite Management, Chapter 17 (Closeout) — A list of items remaining to be completed or corrected before final payment." },
+        { q: "According to OSHA Subpart K, what is the maximum voltage for portable electric tools to be used without a ground (unless double insulated)?", a: "OSHA Subpart K — Double insulated tools are the exception; otherwise, grounding is required." },
+        { q: "Methods of 'Backfilling' trenches (compaction layers, water jetting).", a: "Pipe & Exc., Chapter 8 (Installing Sewer & Stormwater Systems)" },
+        { q: "What is the maximum allowable exposure to impulse or impact noise (dB peak)?", a: "OSHA, Subpart D (Occupational Health and Environmental Controls), 1926.52 — 140 dB" },
+        { q: "Engineered Wood Products (Glulam, LVL, PSL, I-Joists).", a: "Carpentry, Chapter 13" },
+        { q: "What is the minimum bearing length for a wood floor joist on masonry?", a: "IRC, Chapter 5 (Floors), Section R502.6 — 3 inches" },
+        { q: "Installing 'Resilient Channel' to reduce sound transmission in walls.", a: "Gypsum, Chapter 10 or Chapter 2 (Framing)" },
+        { q: "Requirements for 'Toilet and Bathing Facilities' (minimum counts) in commercial buildings.", a: "IBC, Chapter 29 (Plumbing Systems)" },
+        { q: "'Hot Weather' masonry construction requirements (temperature limits for mortar).", a: "Masonry, Chapter 10 (Mortar and Grout) or TMS 602 — Mortar must be between 40°F and 120°F" },
+        { q: "How often must a crane be inspected by a competent person during use?", a: "OSHA, Subpart CC (Cranes), 1926.1412 — Each shift" },
+        { q: "Calculating 'Volume of Concrete' for a circular column (V = πr²h).", a: "Carpentry, Chapter 8 or Reference Section" },
+        { q: "'Weep Screed' installation requirements for exterior plaster/stucco.", a: "IBC, Chapter 25 (Gypsum Board, Gypsum Panel Products and Plaster), Section 2512" },
+        { q: "'Diagonal Bracing' for wood trusses (Permanent Web Member Bracing).", a: "BCSI, Section B3" },
+        { q: "Acceptable 'Drilling and Notching' limits for studs in exterior walls.", a: "IRC, Chapter 6 (Wall Construction), Section R602.6" },
+        { q: "'Air-Entraining Admixtures' (Purpose and effects on concrete).", a: "Concrete, Chapter 2 (Concrete Mix)" },
+        { q: "What is the minimum width of a walkway on a scaffold?", a: "OSHA, Subpart L (Scaffolds), 1926.451(b) — 18 inches" },
+        { q: "Fire-Resistance Ratings for 'Corridors' (Table 1020.1).", a: "IBC, Chapter 10 (Means of Egress)" },
+        { q: "What is the initial curing temperature range for concrete test cylinders (up to 48 hours)?", a: "Concrete, Chapter 2 or ASTM C31 — 60°F to 80°F" },
+        { q: "'Efflorescence' removal techniques from masonry.", a: "Masonry, Chapter 12 (Laying Brick) or Chapter 7 (Clay Masonry Materials)" },
+        { q: "'Barricades' for traffic control on job sites (Type I, II, III).", a: "OSHA, Subpart G (Signs, Signals, and Barricades)" },
+        { q: "'Ice Barrier' underlayment requirements for asphalt shingles.", a: "IRC, Chapter 9 (Roof Assemblies), Section R905.1.2" },
+        { q: "'Gypsum Sheathing' application (weather exposure).", a: "Gypsum, Chapter 3 (Cladding)" },
+        { q: "Allowable 'Deflection' limits for floor members (L/360).", a: "IBC, Chapter 16 (Structural Design), Table 1604.3" },
+        { q: "'Laser Level' operation and safety.", a: "Pipe & Exc., Chapter 3 or Carpentry Chapter 4" },
+        { q: "'Hydrostatic Pressure' effects on foundations.", a: "Concrete, Chapter 4 (Foundations) or Masonry Ch 15" },
+        { q: "Maximum 'Soil Slope' for Type B soil (1:1).", a: "OSHA, Subpart P, Appendix B" },
+        { q: "'Glass Block' installation (Mortar joints, reinforcement).", a: "Masonry, Chapter 13 or IBC Chapter 21" },
+        { q: "'Roof Ventilation' calculation (1/150 rule).", a: "Carpentry, Chapter 22 or IRC Chapter 8" },
+        { q: "'Sump Pumps' and sewage ejectors.", a: "IRC, Chapter 30 (Sanitary Drainage)" },
+        { q: "'Asbestos' exposure limits (PEL) in construction.", a: "OSHA, Subpart Z (Toxic and Hazardous Substances), 1926.1101 — 0.1 f/cc" },
+        { q: "'Lean Construction' principles (Waste reduction).", a: "Construction Jobsite Management, Chapter 13 or 18 (depending on edition)" },
+        { q: "'Stairway Lighting' requirements.", a: "IRC, Chapter 3 (Section R303.7)" },
+        { q: "'Steel Joist' unloading and handling (vertical vs flat).", a: "Steel Joists, Chapter 3" },
+        { q: "'Vapor Retarders' classes (Class I, II, III).", a: "IRC, Chapter 7 (Wall Covering) or IBC Chapter 14" },
+        { q: "'Fireblocking' locations in wood-frame construction.", a: "IRC, Chapter 3 (R302.11) or IBC Chapter 7" },
+        { q: "'Tuckpointing' definition and procedure.", a: "Masonry, Chapter 10 (Mortar) or 12" },
+        { q: "'Safety Nets' placement requirements (distance below working level).", a: "OSHA, Subpart M (Fall Protection), 1926.502(c) — Never more than 30 feet below" },
+        { q: "'Concrete Segregation' causes (Over-vibration, high drop).", a: "Concrete, Chapter 12 (Common Field Problems)" },
+        { q: "'Glazing' near doors (Hazardous locations).", a: "IRC, Chapter 3 (R308) or IBC Chapter 24" },
+        { q: "'Soil Swell' (Bulking factor) calculation.", a: "Pipe & Exc., Chapter 9 (Estimating)" },
+        { q: "According to Carpentry, what is the maximum total length of the three sides of a kitchen 'work triangle' (sink, refrigerator, range)?", a: "Carpentry, Chapter 27 (Cabinets & Countertops) — 26 feet" },
+        { q: "In Masonry, which mortar type is described as having a low compressive strength (350 psi) and is primarily recommended for interior non-loadbearing use or historic restoration?", a: "Masonry, Chapter 10 (Mortar and Grout) — Type O" },
+        { q: "Per OSHA Subpart L, scaffolds must be capable of supporting their own weight and at least how many times the maximum intended load?", a: "OSHA, Subpart L (Scaffolds), 1926.451(a)(1) — 4 times" },
+        { q: "According to Concrete, what is the maximum time allowed to complete the slump test from the start of filling the cone to the removal of the cone?", a: "Concrete, Chapter 2 (Concrete Mix) — 2 ½ minutes" },
+        { q: "In Steel Joists, for steel joist spans greater than 60 feet, what specific type of bridging must be installed before the hoisting cables are released?", a: "Steel Joists, Chapter 6 — Bolted Diagonal Bridging" },
+        { q: "What is the minimum bearing length for a wood floor joist resting on a masonry wall?", a: "IRC, Chapter 5 (Floors), Section R502.6 — 3 inches" },
+        { q: "In Pipe & Exc., what term describes the increase in volume of soil when it is excavated from its natural state?", a: "Pipe & Exc., Chapter 2 (Crew & Equipment Productivity) or Chapter 9 — Swell (or Bulking)" },
+        { q: "According to the Gypsum, which level of drywall finish involves a skim coat of joint compound over the entire surface to minimize joint photographing?", a: "Gypsum, Chapter 5 (Finishing Drywall Systems) — Level 5" },
+        { q: "According to OSHA Subpart P, at what depth does a trench require a specific protective system (shoring, sloping, or shielding) unless the excavation is in stable rock?", a: "OSHA, Subpart P (Excavations) — 5 feet" },
+        { q: "What is the standard height range for a handrail on a flight of stairs?", a: "Carpentry, Chapter 25 (Stairways) or IRC R311 — 34 to 38 inches" },
+        { q: "In Masonry, which bond pattern consists of alternating headers and stretchers in every course?", a: "Masonry, Chapter 12 (Laying Brick) — Flemish Bond" },
+        { q: "According to the BCSI Guide, what is the maximum stack height for gypsum board when it is acting as a construction load on trusses?", a: "BCSI, B4 (Construction Loading) — 12 inches" },
+        { q: "According to Steel Deck, what is the minimum end bearing for steel floor deck resting on concrete or masonry?", a: "Steel Deck, Section 6 — 2 inches (Note: it is 1-1/2 inches on steel supports)" },
+        { q: "What is the maximum moisture content for lumber to be used in framing to prevent excessive shrinkage?", a: "Carpentry, Chapter 12 (Wood as a Building Material) — 19%" },
+        { q: "Per OSHA Subpart H, as the angle of a sling (from the horizontal) decreases, what happens to the stress/tension on the sling legs?", a: "OSHA, Subpart H (Rigging Equipment) — The tension increases" },
+        { q: "According to the IBC, what is the 'Use and Occupancy' classification for a building used for educational purposes by 6 or more persons at any one time through the 12th grade?", a: "IBC, Chapter 3 (Use and Occupancy) — Group E" },
+        { q: "What is the primary purpose of a 'retarding admixture' in concrete?", a: "Concrete, Chapter 2 — To delay the setting time (often used in hot weather)" },
+        { q: "In Gypsum, what is the maximum spacing for control joints in exterior ceilings/soffits?", a: "Gypsum, Chapter 10 (System Design Considerations) — 30 feet" },
+        { q: "According to Masonry, what is 'efflorescence'?", a: "Masonry, Chapter 7 or 12 — White powdery salt deposits on the masonry surface caused by moisture movement" },
+        { q: "What is the minimum net clear opening height for an emergency escape and rescue opening (EERO) in a residence?", a: "IRC, Chapter 3 (Building Planning) — 24 inches" },
+        { q: "According to Steel Joists, how should steel joists generally be stored at the jobsite?", a: "Steel Joists, Chapter 4 — Vertical (upright) or laid flat (if designed for it), but never flat on their sides if they are standard joists." },
+        { q: "According to OSHA Subpart CC, who is responsible for ensuring that the ground conditions are firm, drained, and graded to support the crane?", a: "OSHA, Subpart CC (Cranes) — The Controlling Entity" },
+        { q: "What is the minimum overlap for horizontal rebar splices in a masonry wall?", a: "Masonry, Chapter 11 (Anchors, Ties, and Reinforcement) — Typically 30 bar diameters or 12 inches (whichever is greater)" },
+        { q: "Per OSHA Subpart K, what is the maximum voltage for portable electric tools to be used without a ground (unless double insulated)?", a: "OSHA, Subpart K (Electrical) — Double insulated tools are the exception; otherwise grounding is required." },
+        { q: "According to the Gypsum, what is 'joint photographing'?", a: "Gypsum, Chapter 12 (Problems) — The visibility of joint compound areas through the paint under certain lighting conditions." },
+        { q: "According to Pipe & Exc., what is a 'batter board'?", a: "Pipe & Exc., Chapter 3 or Carpentry Ch 9 — A temporary frame used to hold string lines for building layout/grade." },
+        { q: "What is the maximum spacing of wall ties in a masonry veneer wall (residential)?", a: "IRC, Chapter 7 (R703) — 32 inches horizontally and 24 inches vertically (check local code)" },
+        { q: "According to the Gypsum, what fastener spacing is used for ceiling panels installed perpendicular to framing (screws)?", a: "Gypsum, Chapter 3 (Cladding) — 12 inches o.c." },
+        { q: "What is the minimum overlap for a ladder extending above a landing surface?", a: "OSHA, Subpart X (Ladders) — 3 feet" },
+        { q: "According to BCSI, what is the purpose of a 'spreader bar' when lifting trusses?", a: "BCSI Summary Sheet — To distribute lifting forces and prevent lateral bending/buckling of the truss." },
+        { q: "In Masonry, what is the difference between a 'wythe' and a 'course'?", a: "Masonry, Chapter 7/12 — A course is a horizontal layer; a wythe is a vertical section/thickness of the wall." },
+        { q: "According to The Contractor'sGuide to Quality Concrete Construction, what causes 'honeycombing'?", a: "Contractor'sGuide, Chapter 12 — Improper consolidation (vibration) or leakage of paste through forms." },
+        { q: "According to OSHA Subpart E, at what height is fall protection generally required in construction?", a: "OSHA, Subpart M (Fall Protection) — 6 feet" },
+        { q: "In Masonry, which ASTM standard governs the specification for 'Mortar for Unit Masonry'?", a: "Masonry, Chapter 10 — ASTM C270" },
+        { q: "According to Carpentry, what is the recommended maximum length for the 'work triangle' (sum of distances between sink, range, and refrigerator) in a kitchen layout?", a: "Carpentry, Chapter 27 (Cabinets & Countertops) — 26 feet" },
+        { q: "In Masonry, which mortar type is described as having low compressive strength (350 psi) and is primarily used for interior non-loadbearing walls or historic restoration?", a: "Masonry, Chapter 10 (Mortar and Grout) — Type O" },
+        { q: "According to OSHA Subpart L, scaffolds must be capable of supporting their own weight and at least how many times the maximum intended load?", a: "OSHA, Subpart L (Scaffolds), 1926.451(a)(1) — 4 times" },
+        { q: "In Concrete, what is the maximum time allowed to complete the slump test from the start of filling the cone to the removal of the cone?", a: "Concrete, Chapter 2 (Concrete Mix) — 2 ½ minutes" },
+        { q: "According to Steel Joists, for steel joist spans greater than 60 feet, what specific type of bridging must be installed before the hoisting cables are released?", a: "Steel Joists, Chapter 6 — Bolted Diagonal Bridging" },
+        { q: "According to the IRC, what is the minimum bearing length for a wood floor joist resting on a masonry wall?", a: "IRC, Chapter 5 (Floors), Section R502.6 — 3 inches" },
+        { q: "In Pipe & Exc., what term describes the increase in volume of soil when it is excavated from its natural state?", a: "Pipe & Exc., Chapter 2 (Crew & Equipment Productivity) or Chapter 9 — Swell (or Bulking)" },
+        { q: "According to the Gypsum, which level of drywall finish involves a skim coat of joint compound over the entire surface to minimize joint photographing?", a: "Gypsum, Chapter 5 (Finishing Drywall Systems) — Level 5" },
+        { q: "According to OSHA Subpart P, at what depth does a trench require a specific protective system (shoring, sloping, or shielding) unless the excavation is in stable rock?", a: "OSHA, Subpart P (Excavations) — 5 feet" },
+        { q: "What is the standard height range for a handrail on a flight of stairs in a residential setting?", a: "Carpentry, Chapter 25 (Stairways) or IRC R311 — 34 to 38 inches" },
+        { q: "In Masonry, which bond pattern consists of alternating headers and stretchers in every course?", a: "Masonry, Chapter 12 (Laying Brick) — Flemish Bond" },
+        { q: "According to the BCSI Guide, what is the maximum stack height for gypsum board when it is acting as a construction load on trusses?", a: "BCSI, B4 (Construction Loading) — 12 inches" },
+        { q: "According to Steel Deck, what is the minimum end bearing for steel floor deck resting on concrete or masonry?", a: "Steel Deck, Section 6 — 2 inches (Note: it is 1-1/2 inches on steel supports)" },
+        { q: "What is the maximum moisture content for lumber to be used in framing to prevent excessive shrinkage?", a: "Carpentry, Chapter 12 (Wood as a Building Material) — 19%" },
+        { q: "Per OSHA Subpart H, as the angle of a sling (from the horizontal) decreases, what happens to the stress/tension on the sling legs?", a: "OSHA, Subpart H (Rigging Equipment) — The tension increases" },
+        { q: "According to the IBC, what is the 'Use and Occupancy' classification for a building used for educational purposes by 6 or more persons at any one time through the 12th grade?", a: "IBC, Chapter 3 (Use and Occupancy) — Group E" },
+        { q: "What is the primary purpose of a 'retarding admixture' in concrete?", a: "Concrete, Chapter 2 — To delay the setting time (often used in hot weather)" },
+        { q: "In Gypsum, what is the maximum spacing for control joints in exterior ceilings/soffits?", a: "Gypsum, Chapter 10 (System Design Considerations) — 30 feet" },
+        { q: "According to Masonry, what is 'efflorescence'?", a: "Masonry, Chapter 7 or 12 — White powdery salt deposits on the masonry surface caused by moisture movement" },
+        { q: "What is the minimum net clear opening height for an emergency escape and rescue opening (EERO) in a residence?", a: "IRC, Chapter 3 (Building Planning) — 24 inches" },
+        { q: "According to Steel Joists, how should steel joists generally be stored at the jobsite?", a: "Steel Joists, Chapter 4 — Vertical (upright) or laid flat (if designed for it), but never flat on their sides if they are standard joists." },
+        { q: "According to OSHA Subpart CC, who is responsible for ensuring that the ground conditions are firm, drained, and graded to support the crane?", a: "OSHA, Subpart CC (Cranes) — The Controlling Entity" },
+        { q: "What is the minimum overlap for horizontal rebar splices in a masonry wall?", a: "Masonry, Chapter 11 (Anchors, Ties, and Reinforcement) — Typically 30 bar diameters or 12 inches (whichever is greater)" },
+        { q: "In Concrete, what are the dimensions of a standard slump cone?", a: "Contractor'sGuide, Chapter 2 — 12 inch height, 8 inch base diameter, 4 inch top diameter" },
+        { q: "Per OSHA Subpart K, what is the maximum voltage for portable electric tools to be used without a ground (unless double insulated)?", a: "OSHA, Subpart K (Electrical) — Double insulated tools are the exception; otherwise grounding is required." },
+        { q: "According to the Gypsum, what is 'joint photographing'?", a: "Gypsum, Chapter 12 (Problems) — The visibility of joint compound areas through the paint under certain lighting conditions." },
+        { q: "What is the minimum slope for a standing seam metal roof without sealant (typically)?", a: "IBC Chapter 15 — 2:12 (approximate threshold, varies by manufacturer)" },
+        { q: "According to Pipe & Exc., what is a 'batter board'?", a: "Pipe & Exc., Chapter 3 or Carpentry Ch 9 — A temporary frame used to hold string lines for building layout/grade." },
+        { q: "What is the maximum spacing of wall ties in a masonry veneer wall (residential)?", a: "IRC, Chapter 7 (R703) — 32 inches horizontally and 24 inches vertically (check local code)" },
+        { q: "According to the Gypsum, what fastener spacing is used for ceiling panels installed perpendicular to framing (screws)?", a: "Gypsum, Chapter 3 (Cladding) — 12 inches o.c." },
+        { q: "What is the minimum overlap for a ladder extending above a landing surface?", a: "OSHA, Subpart X (Ladders) — 3 feet" },
+        { q: "According to BCSI, what is the purpose of a 'spreader bar' when lifting trusses?", a: "BCSI Summary Sheet — To distribute lifting forces and prevent lateral bending/buckling of the truss." },
+        { q: "In Masonry, what is the difference between a 'wythe' and a 'course'?", a: "Masonry, Chapter 7/12 — A course is a horizontal layer; a wythe is a vertical section/thickness of the wall." },
+        { q: "According to The Contractor'sGuide to Quality Concrete Construction, what causes 'honeycombing'?", a: "Contractor'sGuide, Chapter 12 — Improper consolidation (vibration) or leakage of paste through forms." },
+        { q: "According to OSHA Subpart E, at what height is fall protection generally required in construction?", a: "OSHA, Subpart M (Fall Protection) — 6 feet" },
+        { q: "In Masonry, which ASTM standard governs the specification for 'Mortar for Unit Masonry'?", a: "Masonry, Chapter 10 — ASTM C270" },
+        { q: "What is the actual size of a nominal 2x4 piece of lumber?", a: "Carpentry, Chapter 12 (Wood as a Building Material) — 1-1/2 inch x 3-1/2 inch" },
+        { q: "According to Masonry, what is the maximum time allowed for using mortar after the initial mixing (retarding admixtures excepted)?", a: "Masonry, Chapter 10 (Mortar and Grout) — 2 ½ hours" },
+        { q: "What is the maximum spacing of anchor bolts for securing a wood sill plate to a concrete foundation?", a: "IRC, Chapter 4 (Foundations), Section R403.1.6 — 6 feet o.c." },
+        { q: "In Pipe & Exc., what is the 'swell factor' (or bulking factor) for common earth/loam?", a: "Pipe & Exc., Chapter 2 (Crew & Equipment Productivity) — Typically 20-25% (check table for specific material)" },
+        { q: "According to the Gypsum, what is the maximum frame spacing for 1/2 inch gypsum board applied perpendicular to ceiling framing?", a: "Gypsum, Chapter 2 (Framing) or Chapter 3 — 24 inches o.c. (Note: it is 16 inches o.c. if applied parallel)" },
+        { q: "What is the minimum diameter of a standard anchor bolt used for wood sill plates?", a: "IRC, Chapter 4 (Foundations), Section R403.1.6 — 1/2 inch" },
+        { q: "According to OSHA, what is the minimum distance a ladder must extend above the upper landing surface?", a: "OSHA, Subpart X (Ladders), 1926.1053(b)(1) — 3 feet" },
+        { q: "What is the minimum embedment depth for a 1/2 inch anchor bolt in concrete?", a: "IRC, Chapter 4 (Foundations), Section R403.1.6 — 7 inches" },
+        { q: "According to The Contractor'sGuide to Quality Concrete Construction, what is 'bleeding' in fresh concrete?", a: "Concrete, Chapter 12 (Common Field Problems) — The development of a layer of water at the top surface of placing concrete caused by the settlement of solid particles." },
+        { q: "What is the standard height of a kitchen base cabinet (without countertop)?", a: "Carpentry, Chapter 27 (Cabinets & Countertops) — 34-1/2 inches" },
+        { q: "In Masonry, what is the purpose of 'furrowing' the mortar bed?", a: "Masonry, Chapter 12 (Laying Brick) — To spread the mortar and create a slight depression to ensure a full bed joint." },
+        { q: "According to BCSI, what is the maximum out-of-plumb tolerance for a truss with a vertical height of 10 feet?", a: "BCSI Summary Sheet — Approx 1.5 inches (Check specific table: generally L/50 or max 2 inches)." },
+        { q: "What is the minimum net clear opening area for an emergency escape and rescue window (Grade floor opening)?", a: "IRC, Chapter 3 (Building Planning), Section R310 — 5.0 sq. ft. (5.7 sq. ft. for upper floors)" },
+        { q: "What is the minimum slope for a built-up roof (BUR)?", a: "IBC, Chapter 15 — 1/4 unit vertical in 12 units horizontal" },
+        { q: "According to OSHA Subpart L, what is the minimum width of a scaffold platform?", a: "OSHA, Subpart L (Scaffolds) — 18 inches" },
+        { q: "In The Gypsum, what type of gypsum panel is 'Type X'?", a: "Gypsum, Chapter 1 (Products) — Fire-resistant gypsum panels" },
+        { q: "What is the standard size of a sheet of plywood or OSB?", a: "Carpentry, Chapter 12 (Wood as a Building Material) — 4 feet x 8 feet" },
+        { q: "According to Masonry, which mortar type has the highest compressive strength (2500 psi)?", a: "Masonry, Chapter 10 (Mortar and Grout) — Type M" },
+        { q: "What is the minimum thickness of a concrete slab-on-ground according to the IRC?", a: "IRC, Chapter 5 (Floors), Section R506 — 3.5 inches" },
+        { q: "In Pipe & Exc., what is the purpose of a 'trench shield' (or trench box)?", a: "Pipe & Exc., Chapter 11 or OSHA Subpart P — To protect workers from cave-ins (it does not prevent the cave-in, but shields the worker)." },
+        { q: "According to SDI Manual, what is the standard depth of 'Composite Floor Deck'?", a: "Steel Deck — Typically 1.5 inches, 2 inches, or 3 inches" },
+        { q: "What is the maximum spacing of supports for 5/8 inch drywall on a wall (single layer)?", a: "Gypsum, Chapter 2 (Framing) — 24 inches o.c." },
+        { q: "According to Carpentry, what is the standard depth of a kitchen wall cabinet?", a: "Carpentry, Chapter 27 (Cabinets & Countertops) — 12 inches" },
+        { q: "In Concrete, what is the recommended minimum temperature for placing concrete in cold weather (thin sections)?", a: "Contractor'sGuide, Chapter 11 — 55°F" },
+        { q: "What is the minimum compressive strength of concrete for a garage floor slab in a moderate weathering potential region?", a: "IRC, Table R402.2 — 3,000 psi" },
+        { q: "According to Steel Joists, what is the minimum bearing length for a K-Series joist on a masonry wall?", a: "Steel Joists — 4 inches" },
+        { q: "What is the maximum opening size allowed in a guardrail (sphere test)?", a: "IBC, Chapter 10 or IRC R312 — 4 inches" },
+        { q: "According to Masonry, what is the definition of a 'wythe'?", a: "Masonry, Chapter 12 (Laying Brick) — A continuous vertical section of a masonry wall, one unit in thickness." },
+        { q: "What is the minimum required headroom for a stairway?", a: "IRC, Section R311.7.2 — 6 feet 8 inches" },
+        { q: "According to OSHA Subpart K, what type of receptacle must be used for temporary power on construction sites?", a: "OSHA, Subpart K — GFCI (Ground Fault Circuit Interrupter)" },
+        { q: "What is the standard depth of a 'countertop' (front to back)?", a: "Carpentry, Chapter 27 — 25 inches (to allow for 1 inch overhang on 24 inch cabinet)." },
+        { q: "According to Gypsum, what is the recommended fastener spacing for wood screws on a ceiling?", a: "Gypsum, Chapter 3 — 12 inches o.c." },
+        { q: "In Concrete, what is 'laitance'?", a: "Contractor'sGuide, Chapter 12 — A weak layer of cement and fine particles on the surface of concrete caused by overwet concrete or overworking." },
+        { q: "What is the minimum slope for a standing seam metal roof (without sealant)?", a: "IBC — Typically 2:12" },
+        { q: "What is the 'actual' size of a nominal 2x6 piece of lumber?", a: "Carpentry, Chapter 12 — 1-1/2 inch x 5-1/2 inch" },
+        { q: "In Masonry, what is the 'IRA' of a brick?", a: "Masonry, Chapter 7 (Clay Masonry Materials) — Initial Rate of Absorption (Suction)" },
+        { q: "According to OSHA Subpart P, what is the maximum allowable slope for Type B soil?", a: "OSHA, Subpart P, Appendix B — 1:1 (45 degrees)" },
+        { q: "What is the minimum width of a footing for a 1-story light-frame house on load-bearing soil (1500 psf)?", a: "IRC, Table R403.1 — 12 inches" },
+        { q: "What is the minimum bearing for a beam resting on masonry?", a: "IBC, Chapter 21 or 23 — 3 inches" },
+        { q: "According to Gypsum, what is the minimum temperature for applying adhesive?", a: "Gypsum, Chapter 3 — 50°F (typically)" },
+        { q: "In Pipe & Exc., what is the difference between 'bank' and 'loose' cubic yards?", a: "Pipe & Exc., Chapter 2 — Bank is volume in the ground (undisturbed); Loose is volume after excavation (swelled)." },
+        { q: "What is the maximum number of disconnects allowed for a service entrance?", a: "IRC, Chapter 36 or — Six" },
+        { q: "According to BCSI, what is the purpose of 'T-reinforcement' on a truss web?", a: "BCSI — To prevent buckling of the web member (Permanent Web Member Reinforcement)." },
+        { q: "What is the minimum clearance for a crane operating near a power line (up to 50kV)?", a: "OSHA Subpart CC — 10 feet" },
+        { q: "In Construction Project Management, what does 'CPM' stand for?", a: "Construction Project Management — Critical Path Method" },
+        { q: "Calculating 'Average End Area' for earthwork volume.", a: "Pipe & Exc., Chapter 9 (Estimating Surface Excavation)" },
+        { q: "Acoustical Ceiling Design (Grid systems, suspension).", a: "Gypsum, Chapter 9" },
+        { q: "'Waterstops' in concrete construction joints (Types and placement).", a: "Concrete, Chapter 7 (Joints and Embedments in Structures)" },
+        { q: "'Panelized Erection' of steel joists (Safety and methods).", a: "Steel Joists, Chapter 7" },
+        { q: "'Fire-Resistance Ratings' for exterior walls based on fire separation distance.", a: "IBC, Chapter 6 (Types of Construction), Table 602" },
+        { q: "'Smoke Alarms' locations and interconnection requirements in residential dwellings.", a: "IRC, Chapter 3 (Building Planning), Section R314" },
+        { q: "'Deck Ledger' attachment to band joists (Fastener spacing table).", a: "IRC, Chapter 5 (Floors), Table R507.9.1.3(1)" },
+        { q: "'Igneous, Sedimentary, and Metamorphic' stone classifications.", a: "Masonry, Chapter 9 (Stone), Section 9.1" },
+        { q: "'STC' (Sound Transmission Class) ratings for gypsum partitions.", a: "Gypsum, Chapter 10 (System Design Considerations) or Chapter 15 (Building Sciences)" },
+        { q: "'Thrust Blocking' for water lines (Location and sizing).", a: "Pipe & Exc., Chapter 7 (Installing Water Systems)" },
+        { q: "'Cantilevered' floor framing details.", a: "Carpentry, Chapter 15 (Floor Framing), Section 15.2" },
+        { q: "'Egress Window' wells (Size and ladder requirements).", a: "IRC, Chapter 3 (Building Planning), Section R310.2" },
+        { q: "'Hazard Communication Standard' (HCS) requirements (SDS, Labeling).", a: "OSHA, Subpart D (1926.59)" },
+        { q: "'Slip Forms' for vertical concrete structures.", a: "Masonry, Chapter 19 (Form Construction), Section 19.2" },
+        { q: "'Acclimation' of wood flooring before installation.", a: "Carpentry, Chapter 34 (Finish Flooring), Section 34.1" },
+        { q: "'Construction Loading' on trusses (Stacking materials).", a: "BCSI, Section B4" },
+        { q: "'Volatile Organic Compounds' (VOCs) in paints and finishes.", a: "Carpentry, Chapter 33 (Exterior & Interior Paint), Section 33.1" },
+        { q: "'Pressure Reducing Valves' for water supply (When required).", a: "IRC, Chapter 29 (Water Supply and Distribution), Section P2903.3" },
+        { q: "'Composite Floor Deck' vs 'Form Deck' profiles.", a: "Steel Deck, Section 1" },
+        { q: "'Joint Photographing' in drywall finishing (Causes and prevention).", a: "Gypsum, Chapter 12 (Problems, Remedies, and Preventive Measures)" },
+        { q: "'Fuel Gas' sediment traps (Drip legs).", a: "IRC, Chapter 24 (Fuel Gas), Section G2419" },
+        { q: "'Type IV' Construction (Heavy Timber).", a: "IBC, Chapter 6 (Types of Construction), Section 602.4" },
+        { q: "'Ductile Iron Pipe' installation.", a: "Pipe & Exc., Chapter 11 (Pipe Materials)" },
+        { q: "'Glass Block' fire ratings and limitations.", a: "IBC, Chapter 21 (Masonry), Section 2110" },
+        { q: "'Truss Damage' assessment and reporting.", a: "BCSI, Section B5" },
+        { q: "'Steel Stud' gauges and color codes.", a: "Carpentry, Chapter 29 (Steel Framing Basics) or Gypsum Ch 2" },
+        { q: "'Cement Board' installation for tile backing.", a: "Gypsum, Chapter 4 (Backerboard Installation)" },
+        { q: "'GFCI' protection requirements for construction sites.", a: "OSHA, Subpart K (Electrical), 1926.404(b)" },
+        { q: "'Stair Rails' vs 'Handrails' (Height and graspability).", a: "OSHA, Subpart X (Stairways and Ladders) or IBC 1014" },
+        { q: "'Patterned Concrete' finishing techniques (Stamping).", a: "Masonry, Chapter 20 (Concrete Flatwork), Section 20.4" },
+        { q: "'Delivery Time' limits for ready-mixed concrete.", a: "Concrete, Chapter 3 (Concrete Specification) — 90 minutes" },
+        { q: "'Hip Rafter' shortening calculation.", a: "Carpentry, Chapter 18 (Hip, Valley, & Jack Rafters)" },
+        { q: "'Bridging' in floor framing (Wood).", a: "Carpentry, Chapter 15 (Floor Framing), Section 15.2" },
+        { q: "'Accessibility' parking space dimensions.", a: "IBC, Chapter 11 or ICC A117.1" },
+        { q: "'Field Welding' of steel joists.", a: "Steel Joists, Chapter 5" },
+        { q: "'Fire Extinguisher' rating requirements for construction areas.", a: "OSHA, Subpart F"}
+    ];
+    // --- STATE & STORAGE ---
+    let visibleItems = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let synth = window.speechSynthesis;
+    let currentUtterance = null;
+    let flaggedItems = JSON.parse(localStorage.getItem('gcQuizFlags')) || {};
+    let userComments = JSON.parse(localStorage.getItem('gcQuizComments')) || {};
+    let areAllExpanded = false;
+
+    window.onload = function() {
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.menu-wrapper')) {
+                document.querySelectorAll('.menu-dropdown').forEach(el => el.classList.remove('show'));
+            }
+        });
+        populateSections();
+        renderList(rawData);
+    };
+
+    // --- DOM RENDERING ---
+    function renderList(data) {
+        const container = document.getElementById('quiz-list');
+        container.innerHTML = "";
+        visibleItems = [];
+
+        if(data.length === 0) {
+            container.innerHTML = "<div style='text-align:center; padding:30px; color:#94a3b8;'>No questions in this folder.</div>";
+            return;
+        }
+
+        data.forEach((item, index) => {
+            visibleItems.push(item);
+            const flagStatus = flaggedItems[item.q] || 0;
+            const myComment = userComments[item.q] || ""; // Get saved comment
+
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.id = `q-${index}`;
+            div.setAttribute('data-flag', flagStatus);
+
+            const splitAns = item.a.split('[');
+            const mainAns = splitAns[0];
+            const cite = splitAns.length > 1 ? '[' + splitAns[1] : '';
+
+            let badgeHtml = '';
+            if(flagStatus == 1) badgeHtml = '<div class="flag-badge badge-1">🚩 Revise</div>';
+            if(flagStatus == 2) badgeHtml = '<div class="flag-badge badge-2">⚠️ Fix Info</div>';
+            if(flagStatus == 3) badgeHtml = '<div class="flag-badge badge-3">🛠️ Changes</div>';
+
+            div.innerHTML = `
+                <div class="card-header" onclick="toggleCard(this)">
+                    <div class="q-content">
+                        <div class="q-num">${index + 1}</div>
+                        <div>
+                            <div class="q-text">${item.q}</div>
+                            ${badgeHtml}
+                        </div>
+                    </div>
+                    <div class="menu-wrapper" onclick="event.stopPropagation()">
+                        <button class="menu-btn" onclick="toggleMenu('menu-${index}')">⋮</button>
+                        <div id="menu-${index}" class="menu-dropdown">
+                            <div class="menu-item" onclick="copyCard(${index})">📋 Copy Content</div>
+                            <div class="menu-item" onclick="setFlag(${index}, 1)">🚩 Flag 1 (Revise)</div>
+                            <div class="menu-item" onclick="setFlag(${index}, 2)">⚠️ Flag 2 (Misinfo)</div>
+                            <div class="menu-item" onclick="setFlag(${index}, 3)">🛠️ Flag 3 (Problem)</div>
+                            ${flagStatus !== 0 ? `<div class="menu-item" onclick="setFlag(${index}, 0)" style="color:#ef4444; border-top:1px solid #334155;">❌ Remove Flag</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="answer-box">
+                    <div class="ans-content">
+                        <div class="ans-text">${mainAns}</div>
+                        ${cite ? `<span class="citation">${cite}</span>` : ''}
+                        
+                        <div class="comment-section">
+                            <label class="comment-label">📝 My Notes</label>
+                            <textarea class="comment-box" placeholder="Tap to add notes for this question..." oninput="saveComment(${index}, this.value)">${myComment}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        areAllExpanded = false;
+        document.getElementById('expandAllBtn').innerText = "🔽 Expand All";
+    }
+
+    // --- MENU ACTIONS ---
+    function toggleMenu(id) {
+        document.querySelectorAll('.menu-dropdown').forEach(el => {
+            if(el.id !== id) el.classList.remove('show');
+        });
+        document.getElementById(id).classList.toggle('show');
+    }
+
+    // --- COMMENT LOGIC ---
+    function saveComment(index, value) {
+        const item = visibleItems[index];
+        if (value.trim() === "") {
+            delete userComments[item.q];
+        } else {
+            userComments[item.q] = value;
+        }
+        localStorage.setItem('gcQuizComments', JSON.stringify(userComments));
+    }
+
+    // --- FIX: FALLBACK COPY METHOD ---
+    function copyCard(index) {
+        const item = visibleItems[index];
+        const text = `Q: ${item.q}\n\nA: ${item.a}`;
+
+        // Attempt Modern API first
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Copied!");
+                toggleMenu(`menu-${index}`);
+            }).catch(err => {
+                console.warn('Clipboard API failed, trying fallback...');
+                fallbackCopy(text, index);
+            });
+        } else {
+            // Fallback for local files
+            fallbackCopy(text, index);
+        }
+    }
+
+    function fallbackCopy(text, index) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        
+        // Hide element
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            var successful = document.execCommand('copy');
+            if(successful) alert("Copied!");
+            else alert("Copy failed. Browser restricted.");
+        } catch (err) {
+            alert("Unable to copy.");
+        }
+
+        document.body.removeChild(textArea);
+        toggleMenu(`menu-${index}`);
+    }
+
+    function setFlag(index, type) {
+        const item = visibleItems[index];
+        if (type === 0) delete flaggedItems[item.q];
+        else flaggedItems[item.q] = type;
+
+        localStorage.setItem('gcQuizFlags', JSON.stringify(flaggedItems));
+        document.getElementById(`menu-${index}`).classList.remove('show');
+        
+        // If in a folder, re-filter; otherwise re-render to update badges
+        const currentFolder = document.getElementById('folderSelect').value;
+        if(currentFolder !== 'all') filterByFolder();
+        else renderList(visibleItems);
+    }
+
+    // --- FILTERS & TOGGLES ---
+    function filterByFolder() {
+        const type = document.getElementById('folderSelect').value;
+        document.getElementById('searchInput').value = "";
+        
+        if (type === 'all') { renderList(rawData); return; }
+        const filtered = rawData.filter(item => flaggedItems[item.q] == type);
+        renderList(filtered);
+    }
+
+    function toggleCard(header) { 
+        header.parentElement.classList.toggle('revealed'); 
+    }
+
+    function toggleAllCards() {
+        areAllExpanded = !areAllExpanded;
+        const cards = document.querySelectorAll('.card');
+        const btn = document.getElementById('expandAllBtn');
+        
+        cards.forEach(card => {
+            if(areAllExpanded) card.classList.add('revealed');
+            else card.classList.remove('revealed');
+        });
+
+        btn.innerText = areAllExpanded ? "🔼 Collapse All" : "🔽 Expand All";
+    }
+
+    function shuffleData() {
+        stopAudio();
+        rawData.sort(() => Math.random() - 0.5);
+        document.getElementById('searchInput').value = "";
+        document.getElementById('folderSelect').value = "all";
+        renderList(rawData);
+    }
+
+    function handleSearch() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        document.getElementById('folderSelect').value = "all"; 
+        if (!term) { renderList(rawData); return; }
+        const filtered = rawData.filter(item => item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term));
+        renderList(filtered);
+    }
+
+    function populateSections() {
+        const select = document.getElementById('sectionSelect');
+        const sections = new Set();
+        rawData.forEach(item => {
+            let src = item.a.split(',')[0].trim();
+            if(src.includes('Source:')) src = src.split('Source:')[1].trim();
+            src = src.split(' ')[0]; 
+            if(src && src.length > 2) sections.add(src);
+        });
+        Array.from(sections).sort().forEach(sec => {
+            const opt = document.createElement('option');
+            opt.value = sec; opt.textContent = sec;
+            select.appendChild(opt);
+        });
+    }
+
+    // --- AUDIO ---
+    function togglePlay() { if (isPlaying) pauseAudio(); else playAudio(); }
+    
+    function playAudio() {
+        if(visibleItems.length === 0) return;
+        isPlaying = true;
+        document.getElementById('playPauseBtn').textContent = "⏸ Pause";
+        if (synth.paused) synth.resume(); else readCard(currentIndex);
+    }
+    
+    function pauseAudio() {
+        isPlaying = false; synth.pause();
+        document.getElementById('playPauseBtn').textContent = "▶ Resume";
+    }
+    
+    function stopAudio() {
+        isPlaying = false; synth.cancel();
+        document.getElementById('playPauseBtn').textContent = "▶ Play";
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active-reading'));
+        document.getElementById('statusDisplay').innerText = "Stopped";
+    }
+    
+    function skip(dir) {
+        synth.cancel();
+        let newIndex = currentIndex + dir;
+        if(newIndex < 0) newIndex = 0;
+        if(newIndex >= visibleItems.length) { stopAudio(); return; }
+        currentIndex = newIndex;
+        if(isPlaying) readCard(currentIndex);
+        else highlightCard(currentIndex);
+    }
+
+    function readCard(index) {
+        if (!isPlaying || index >= visibleItems.length) { stopAudio(); return; }
+        currentIndex = index;
+        highlightCard(index);
+        
+        const item = visibleItems[index];
+        const text = `Question ${index + 1}. ${item.q}... Answer... ${item.a.split('[')[0]}`;
+        currentUtterance = new SpeechSynthesisUtterance(text);
+        
+        document.getElementById('statusDisplay').innerText = `Reading ${index+1}/${visibleItems.length}`;
+        currentUtterance.onend = () => { if(isPlaying) readCard(index + 1); };
+        synth.speak(currentUtterance);
+    }
+
+    function highlightCard(index) {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active-reading'));
+        const card = document.getElementById(`q-${index}`);
+        if(card) {
+            card.classList.add('active-reading');
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('revealed');
+        }
+    }
+    
+    function jumpToNumber() {
+        const val = parseInt(document.getElementById('jumpInput').value);
+        if (!val || val < 1 || val > visibleItems.length) return;
+        stopAudio();
+        currentIndex = val - 1;
+        isPlaying = true;
+        document.getElementById('playPauseBtn').textContent = "⏸ Pause";
+        readCard(currentIndex);
+    }
+
+    function jumpToSection() {
+        stopAudio();
+        const sec = document.getElementById('sectionSelect').value;
+        if(sec==='all') renderList(rawData);
+        else renderList(rawData.filter(i => i.a.includes(sec)));
+    }
+</script>
+
+</body>
+</html>
