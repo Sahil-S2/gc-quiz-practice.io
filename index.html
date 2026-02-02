@@ -346,58 +346,58 @@
     .fs-img { max-width: 95%; max-height: 80%; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     .fs-close { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; }
     
-    /* --- COMPACT FLOATING AUDIO PLAYER --- */
+    /* --- COMPACT FLOATING AUDIO PLAYER (Updated for larger mobile touch points) --- */
     .audio-player {
-        position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
-        width: 90%; max-width: 400px;
-        background: rgba(15, 23, 42, 0.95); /* High contrast dark */
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        width: 92%; max-width: 420px;
+        background: rgba(15, 23, 42, 0.98); /* Slightly more opaque */
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 30px; /* Capsule shape */
-        padding: 6px 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 40px; /* More pronounced capsule shape */
+        padding: 10px 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.7);
         z-index: 9999;
         display: flex; align-items: center; justify-content: space-between;
-        gap: 8px;
+        gap: 10px;
         transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     /* Top Bar Elements */
     .player-persistent {
-        display: flex; align-items: center; gap: 8px; flex: 1; justify-content: space-between;
+        display: flex; align-items: center; gap: 10px; flex: 1; justify-content: space-between;
         width: 100%;
     }
 
     /* Hidden Controls Drawer */
     .player-body {
         display: none; /* Hidden by default */
-        position: absolute; bottom: 100%; left: 0; right: 0;
+        position: absolute; bottom: 110%; left: 0; right: 0;
         background: #1e293b;
         border: 1px solid var(--border);
-        border-radius: 16px;
-        margin-bottom: 10px;
-        padding: 12px;
-        flex-direction: column; gap: 8px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        border-radius: 20px;
+        margin-bottom: 15px;
+        padding: 16px;
+        flex-direction: column; gap: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .player-body.show { display: flex; animation: fadeInUp 0.2s; }
 
     /* Compact Buttons & Inputs */
     .player-select { 
-        height: 28px; font-size: 0.8em; padding: 0 5px; max-width: 110px;
-        border-radius: 14px; background: rgba(0,0,0,0.4); border:none; color: #ccc;
+        height: 32px; font-size: 0.85em; padding: 0 8px; max-width: 120px;
+        border-radius: 16px; background: rgba(0,0,0,0.4); border:none; color: #ccc;
     }
     .player-input {
-        width: 40px; height: 28px; font-size: 0.85em; text-align: center;
-        border-radius: 14px; background: rgba(0,0,0,0.4); border:none; padding: 0;
+        width: 48px; height: 32px; font-size: 0.9em; text-align: center;
+        border-radius: 16px; background: rgba(0,0,0,0.4); border:none; padding: 0;
     }
     
     .p-btn {
-        background: transparent; border: 1px solid rgba(255,255,255,0.1);
+        background: transparent; border: 1px solid rgba(255,255,255,0.15);
         color: #fff; border-radius: 50%;
-        width: 32px; height: 32px;
+        width: 36px; height: 36px;
         display: flex; align-items: center; justify-content: center;
-        cursor: pointer; font-size: 14px;
+        cursor: pointer; font-size: 16px;
         transition: all 0.2s;
     }
     .p-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
@@ -405,40 +405,47 @@
     .p-btn-main {
         background: linear-gradient(135deg, #3b82f6, #2563eb); 
         border: none;
-        width: 42px; height: 42px;
-        font-size: 18px;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.6);
+        width: 48px; height: 48px;
+        font-size: 20px;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.6);
         border-radius: 50%;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         display: flex; align-items: center; justify-content: center;
-        padding: 0; /* Reset padding to ensure perfect centering */
+        padding: 0;
     }
     .p-btn-main.playing {
         background: #ffffff; 
         color: var(--accent);
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        transform: scale(1.1);
     }
     .p-btn-main:active { transform: scale(0.9); }
     
     .p-btn-stop {
-        border-radius: 8px; width: auto; padding: 0 10px; font-size: 0.8em; height: 28px;
+        border-radius: 10px; width: auto; padding: 0 12px; font-size: 0.85em; height: 32px;
         background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444;
-        animation: none; /* Removed Pulse */
     }
 
     .toggle-btn {
-        width: auto; border-radius: 14px; padding: 0 10px; height: 28px;
-        font-size: 0.8em; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        width: auto; border-radius: 16px; padding: 0 14px; height: 36px;
+        font-size: 0.85em; font-weight: 600; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+        display: flex; align-items: center; justify-content: center;
     }
     .toggle-btn.active { background: var(--accent); color: white; border-color: transparent; }
 
     /* --- MOBILE FIXES --- */
     @media (max-width: 600px) {
-        .audio-player { width: 94%; bottom: 10px; padding: 5px 12px; }
+        .audio-player { 
+            width: 94%; 
+            bottom: 12px; 
+            padding: 10px 15px; 
+            border-radius: 35px;
+        }
+        .toggle-btn { height: 40px; font-size: 0.9em; } /* Larger tap target */
+        .player-input { width: 52px; height: 40px; }
         .filter-scroll { padding-bottom: 8px; }
         .note-input-item { width: 100%; min-width: 100%; }
-        .fab-btn { bottom: 85px; }
+        .fab-btn { bottom: 100px; } /* Moved up to clear larger player */
     }
 </style>
 </head>
@@ -511,7 +518,7 @@
             <span style="font-size:0.75em; color:var(--text-muted);" id="statusDisplay">Ready</span>
             <button class="p-btn p-btn-stop" onclick="stopAudio()">⏹ Stop</button>
          </div>
-         <div style="display:flex; justify-content:center; gap:15px; align-items:center;">
+         <div style="display:flex; justify-content:center; gap:20px; align-items:center;">
              <button class="p-btn" onclick="skip(-1)">⏮</button>
              <button class="p-btn p-btn-main" id="playPauseBtn" onclick="togglePlay()">▶</button>
              <button class="p-btn" onclick="skip(1)">⏭</button>
@@ -523,9 +530,9 @@
         
         <div style="flex:1"></div> 
         
-        <div style="display:flex; gap:5px; align-items:center;">
+        <div style="display:flex; gap:8px; align-items:center;">
             <input type="number" id="jumpInput" class="player-input" min="1" placeholder="#">
-            <button class="p-btn" style="width:28px; height:28px; border-radius:8px;" onclick="jumpToNumber()">Go</button>
+            <button class="p-btn" style="width:36px; height:36px; border-radius:10px;" onclick="jumpToNumber()">Go</button>
         </div>
 
         <button id="playerToggleBtn" class="toggle-btn" onclick="toggleAudioPlayer()">🎵 Audio</button>
@@ -15718,12 +15725,6 @@
             card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             if(currentMode !== 'mcq') card.classList.add('revealed');
         }
-    }
-    
-    // --- NEW SCROLL TO TOP FUNCTION ---
-    window.scrollToTop = function() {
-        playSound('click');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
 
