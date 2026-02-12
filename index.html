@@ -935,12 +935,16 @@
     }
     
     // --- SPEED CONTROL LOGIC ---
+    // --- UPDATED SPEED CONTROL: Includes Faster Options ---
     window.cycleSpeed = function() {
         playSound('click');
         const btn = document.getElementById('speedBtn');
         
-        // Cycle: 1.0 -> 0.75 -> 0.5 -> 0.25 -> 1.0
-        if (window.speechRate === 1.0) window.speechRate = 0.75;
+        // Cycle: 1.0 -> 1.25 -> 1.5 -> 2.0 -> 0.75 -> 0.5 -> 0.25 -> 1.0
+        if (window.speechRate === 1.0) window.speechRate = 1.25;
+        else if (window.speechRate === 1.25) window.speechRate = 1.5;
+        else if (window.speechRate === 1.5) window.speechRate = 2.0;
+        else if (window.speechRate === 2.0) window.speechRate = 0.75;
         else if (window.speechRate === 0.75) window.speechRate = 0.5;
         else if (window.speechRate === 0.5) window.speechRate = 0.25;
         else window.speechRate = 1.0;
@@ -19361,43 +19365,125 @@
         }
     }
 
+    // --- UPDATED AUDIO LOGIC: SMART CHUNKING & PAUSING ---
+
     window.readCard = function(index, speechId) {
         if (!isPlaying || index >= visibleItems.length || speechId !== currentSpeechId) return;
         currentIndex = index;
         highlightCard(index);
+        
         const item = visibleItems[index];
         let flags = window.flaggedItems[item.q] || [];
         if(!Array.isArray(flags)) flags = flags ? [flags] : [];
-        let answerText = item.a.replace(/\[Source:/i, "... Source: ").replace(/\]/g, "");
-        let text = `Question ${item.id}. ${item.q}... Answer... ${answerText}`; // Read original ID
+        
+        // Clean text extraction: Remove [Source: ...] tags from the answer text
+        let answerRaw = item.a.replace(/\[Source:.*?\]/g, "").trim(); 
+        let sourceRaw = "";
+        
+        // Extract Source from either the answer string or the item object
+        let sourceMatch = item.a.match(/\[Source:(.*?)\]/i);
+        if(sourceMatch) sourceRaw = sourceMatch[1].trim();
+        else if(item.source) sourceRaw = item.source;
+        
         if(flags.includes(4) && window.chapterData[item.q]) {
-            text += "... Chapter Reference: " + window.chapterData[item.q];
+            sourceRaw += (sourceRaw ? ", " : "") + window.chapterData[item.q];
         }
-        speakText(text, speechId, () => readCard(index + 1, speechId));
+
+        // Create logical chunks
+        const chunks = [
+            { text: `Question ${item.id}. ${item.q}`, type: 'q' },
+            { text: "The answer is...", type: 'lead' },
+            { text: answerRaw, type: 'a' } // This is the core answer to memorize
+        ];
+        
+        // Only add source chunk if it exists
+        if(sourceRaw) {
+             chunks.push({ text: `Source... ${sourceRaw}`, type: 'src' });
+        }
+
+        speakChunks(chunks, speechId, () => readCard(index + 1, speechId));
     }
 
     window.readMCQ = function(index, speechId) {
         if (!isPlaying || index >= currentMCQItems.length || speechId !== currentSpeechId) return;
         currentIndex = index;
         highlightCard(index); 
+        
         const item = currentMCQItems[index];
         const correctText = item.options[item.correct];
-        const text = `Question ${item.id}. ${item.q}... The correct answer is... ${correctText}... Source: ${item.source}`; // Read original ID
-        speakText(text, speechId, () => readMCQ(index + 1, speechId));
+        
+        const chunks = [
+            { text: `Question ${item.id}. ${item.q}`, type: 'q' },
+            { text: "The correct answer is...", type: 'lead' },
+            { text: correctText, type: 'a' },
+            { text: `Source... ${item.source}`, type: 'src' }
+        ];
+
+        speakChunks(chunks, speechId, () => readMCQ(index + 1, speechId));
     }
 
-    function speakText(text, speechId, callback) {
-        const u = new SpeechSynthesisUtterance(text);
-        if (selectedVoice) u.voice = selectedVoice; 
-        u.rate = window.speechRate; // USE GLOBAL SPEECH RATE
-        u.onend = () => { 
-            if(isPlaying && speechId === currentSpeechId) callback(); 
-        };
-        u.onerror = (e) => { 
-            if(isPlaying && speechId === currentSpeechId) setTimeout(() => callback(), 100); 
+    // New Engine: Handles pauses and speed adjustments dynamically
+    function speakChunks(chunks, speechId, onComplete) {
+        let chunkIndex = 0;
+
+        function speakNextChunk() {
+            if (!isPlaying || speechId !== currentSpeechId) return;
+            
+            if (chunkIndex >= chunks.length) {
+                onComplete(); // Move to next card
+                return;
+            }
+
+            const chunk = chunks[chunkIndex];
+            // Add periods to ensure tone drops naturally at end of sentence
+            const u = new SpeechSynthesisUtterance(chunk.text + "."); 
+            
+            if (selectedVoice) u.voice = selectedVoice;
+            
+            // LOGIC: Adaptive Speed
+            // If it's the main Answer ('a') and it's long (>60 chars), 
+            // slow it down by 10% relative to current global setting for better clarity.
+            let adjustedRate = window.speechRate;
+            if (chunk.type === 'a' && chunk.text.length > 60) { 
+                adjustedRate = Math.max(0.25, window.speechRate * 0.9); 
+            }
+            u.rate = adjustedRate;
+
+            u.onend = () => {
+                if (!isPlaying || speechId !== currentSpeechId) return;
+                
+                // LOGIC: Cognitive Pauses
+                // Add specific silence AFTER reading specific parts
+                let pauseDuration = 300; // Default tiny pause
+                
+                if (chunk.type === 'lead') {
+                    pauseDuration = 100; // Fast transition from "Answer is" -> [Answer]
+                } else if (chunk.type === 'a') { 
+                    pauseDuration = 1500; // LONG PAUSE (1.5s) after Answer to memorize it
+                } else if (chunk.type === 'src') {
+                    pauseDuration = 1000; // Medium pause after Source before next Q
+                }
+
+                chunkIndex++;
+                setTimeout(speakNextChunk, pauseDuration);
+            };
+
+            u.onerror = (e) => {
+                // If error, skip to next chunk quickly
+                chunkIndex++;
+                setTimeout(speakNextChunk, 100);
+            };
+
+            // Update Status Display with specific details
+            let statusText = `Reading Q${currentIndex+1} (${window.speechRate}x)`;
+            if(chunk.type === 'a') statusText = `Q${currentIndex+1}: Answer...`;
+            if(chunk.type === 'src') statusText = `Q${currentIndex+1}: Source...`;
+            document.getElementById('statusDisplay').innerText = statusText;
+
+            synth.speak(u);
         }
-        document.getElementById('statusDisplay').innerText = `Reading Q${currentIndex+1} (${window.speechRate}x)`;
-        synth.speak(u);
+
+        speakNextChunk();
     }
 
     window.highlightCard = function(index) {
