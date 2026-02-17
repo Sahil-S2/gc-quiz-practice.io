@@ -662,6 +662,7 @@
             <button class="btn material" onclick="switchMode('material')" id="btn-material">📚 Study Material</button>
             <button class="btn sfx" id="btn-sfx" onclick="toggleSFX()">🔊</button>
             <button class="btn" onclick="switchMode('latest-important')" id="btn-latest">⭐ Latest Important</button>
+            <button class="btn" onclick="switchMode('key-tables')" id="btn-tables">📊 Key Tables</button>
         </div>
 
         <div id="flashcard-controls">
@@ -16175,11 +16176,815 @@
 { q: "How many climate zones does Georgia contain?", a: "3 [Source: IECC: International Energy Conservation Code 2015 - Figure R301.1]" }
     ];
 
+var keyTablesData = [
+        {
+    "q": "Table R301.2(1)",
+     "a": "Climatic and Geographic Design Criteria [Source: IRC 2018, Ch. 3 Building Planning - Design Criteria] "
+  },
+  {
+    "q": "Table R301.5",
+    "a": "Minimum Uniformly Distributed Live Loads [Source: IRC 2018, Ch.  3 Building Planning - Design Criteria] "
+  },
+  {
+    "q": "Table R302.1(1)",
+    "a": "Exterior Walls Fire Separation Distance [Source: IRC 2018, Ch.  3 Building Planning - Fire-Resistant Construction] "
+  },
+  {
+    "q": "Table R302.6",
+    "a": "Dwelling-Garage Separation [Source: IRC 2018, Ch.  3 Building Planning - Fire-Resistant Construction] "
+  },
+  {
+    "q": "Table R403.1(1)",
+    "a": "Minimum Width/Thickness of Concrete Footings [Source: IRC 2018, Ch.  4 Foundations - Footings] "
+  },
+  {
+    "q": "Table R502.3.1(1)",
+    "a": "Floor Joist Spans for Common Lumber Species (Residential Living Areas) [Source: IRC 2018, Ch.  5 Floors - Wood Floor Framing] "
+  },
+  {
+    "q": "Table R502.3.1(2)",
+    "a": "Floor Joist Spans for Common Lumber Species (Sleeping Areas) [Source: IRC 2018, Ch.  5 Floors - Wood Floor Framing] "
+  },
+  {
+    "q": "Table R507.5",
+    "a": "Deck Beam Span Lengths [Source: IRC 2018, Ch.  5 Floors - Exterior Decks] "
+  },
+  {
+    "q": "Table R507.6",
+    "a": "Deck Joist Spans [Source: IRC 2018, Ch.  5 Floors - Exterior Decks] "
+  },
+  {
+    "q": "Table R602.3(1)",
+    "a": "Fastener Schedule for Structural Members [Source: IRC 2018, Ch.  6 Wall Construction - Wood Wall Framing] "
+  },
+  {
+    "q": "Table R602.3(5)",
+    "a": "Size, Height and Spacing of Wood Studs [Source: IRC 2018, Ch.  6 Wall Construction - Wood Wall Framing] "
+  },
+  {
+    "q": "Table R602.7(1)",
+    "a": "Girder Spans and Header Spans for Exterior Bearing Walls [Source: IRC 2018, Ch.  6 Wall Construction - Wood Wall Framing] "
+  },
+  {
+    "q": "Table R602.10.3(3)",
+    "a": "Bracing Requirements Based on Seismic Design Category [Source: IRC 2018, Ch.  6 Wall Construction - Wall Bracing] "
+  },
+  {
+    "q": "Table R602.10.4",
+    "a": "Bracing Methods [Source: IRC 2018, Ch.  6 Wall Construction - Wall Bracing] "
+  },
+  {
+    "q": "Table R702.35",
+    "a": "Minimum Thickness and Application of Gypsum Board [Source: IRC 2018, Ch.  7 Wall Covering - Interior Covering] "
+  },
+  {
+    "q": "Table R802.4.1(1)",
+    "a": "Ceiling Joist Spans for Common Lumber Species [Source: IRC 2018, Ch.  8 Roof-Ceiling Construction - Wood Roof Framing] "
+  },
+  {
+    "q": "Table R802.5.1(1)",
+    "a": "Rofter Spans for Common Lumber Species (Roof Live Load 20 psf) [Source: IRC 2018, Ch.  8 Roof-Ceilling Construction - Wood Roof Framing] "
+  },
+  {
+    "q": "Table R905.1.1(2)",
+    "a": "Underlayment Application [Source: IRC 2018, Ch.  9 Roof Assemblies - Roof Coverings] "
+  },
+  {
+    "q": "Table N1102.1.2 (R402.1.2)",
+    "a": "Insulation and Fenestration Requirements by Component [Source: IRC 2018, Ch.  11 Energy Efficiency - Building Thermal Envelope] "
+  },
+  {
+    "q": "Table G2413.4(1)",
+    "a": "Schedule 40 Metallic Pipe Sizing (Natural Gas) [Source: IRC 2018, Ch.  24 Fuel Gas - Pipe Sizing] "
+  },
+  {
+    "q": "Table P2903.1",
+    "a": "Required Capacities at Fixture Outlets [Source: IRC 2018, Ch.  29 Water Supply - Water Supply System] "
+  },
+  {
+    "q": "Table P2906.4",
+    "a": "Water Service Pipe [Source: IRC 2018, Ch.  29 Water Supply - Materials, Joints & Connections] "
+  },
+  {
+    "q": "Table P3004.1",
+    "a": "Drainage Fixture Unit (DFU) Values for Various Plumbing Fixtures [Source: IRC 2018, Ch.  30 Sanitary Drainage - Drainage Fixture Units] "
+  },
+  {
+    "q": "Table P3105.1",
+    "a": "Maximum Distance of Fixture Trap from Vent [Source: IRC 2018, Ch.  31 Vents - Fixture Vents] "
+  },
+  {
+    "q": "Table E5705.1",
+    "a": "Allowable Ampacities of Conductors [Source: IRC 2018, Ch.  37 Branch Circuit/Feeder - Conductor Sizing] "
+  },
+  {
+    "q": "Table 307.1(1)",
+    "a": "Maximum Allowable Quantity per Control Area of Hazardous Materials Posing a Physical Hazard [Source: IBC 2018, Ch.  3 Use and Occupancy - Hazardous Materials] "
+  },
+  {
+    "q": "Table 504.3",
+    "a": "Allowable Building Height in Feet Above Grade Plane [Source: IBC 2018, Ch.  5 Heights and Areas - Building Height] "
+  },
+  {
+    "q": "Table 504.4",
+    "a": "Allowable Number of Stories Above Grade Plane [Source: IBC 2018, Ch.  5 Heights and Areas - Building Height] "
+  },
+  {
+    "q": "Table 506.2",
+    "a": "Allowable Area Factor (At NS, S1, S13R, or SM) [Source: IBC 2018, Ch.  5 Heights and Areas - Building Area] "
+  },
+  {
+    "q": "Table 508.4",
+    "a": "Required Separation of Occupancies (Hours) [Source: IBC 2018, Ch.  5 Heights and Areas - Mixed Use and Occupancy] "
+  },
+  {
+    "q": "Table 509",
+    "a": "Incidental Uses and Required Fire Separation/Protection [Source: IBC 2018, Ch.  5 Heights and Areas - Incidental Uses] "
+  },
+  {
+    "q": "Table 601",
+    "a": "Fire-Resistance Rating Requirements for Building Elements (Hours) [Source: IBC 2018, Ch.  6 Types of Construction - General] "
+  },
+  {
+    "q": "Table 602",
+    "a": "Fire-Resistance Rating Requirements for Exterior Walls Based on Fire Separation Distance [Source: IBC 2018, Ch.  6 Types of Construction - General] "
+  },
+  {
+    "q": "Table 705.8",
+    "a": "Maximum Area of Exterior Wall Openings Based on Fire Separation Distance [Source: IBC 2018, Ch.  7 Fire and Smoke Protection - Exterior Walls] "
+  },
+  {
+    "q": "Table 706.4",
+    "a": "Fire Wall Fire-Resistance Ratings [Source: IBC 2018, Ch.  7 Fire and Smoke Protection - Fire Walls] "
+  },
+  {
+    "q": "Table 716.1(2)",
+    "a": "Opening Fire Protection Assemblies, Ratings and Morkings [Source: IBC 2018, Ch.  7 Fire and Smoke Protection - Opening Protectives] "
+  },
+  {
+    "q": "Table 1004.5",
+    "a": "Maximum Floor Area Allowances Per Occupant [Source: IBC 2018, Ch.  10 Means of Egress - Occupant Load] "
+  },
+  {
+    "q": "Table 1604.3",
+    "a": "Deflection Limits [Source: IBC 2018, Ch.  16 Structural Design - General Design Requirements] "
+  },
+  {
+    "q": "Table 1.1",
+     "a": "Gypsum Panel Products: Sizes and Types [Source: Gypsum,  Ch. 1 - Gypsum Panel Products] "
+  },
+  {
+    "q": "Table 301.1",
+     "a": "Climate Zones by County [Source: 2009 IECC,  Ch. 3 - Climate Zones] "
+  },
+  {
+    "q": "Table 503.2.5(3)",
+     "a": "Minimum Efficiency: Packaged Terminals [Source: 2009 IECC,  Ch. 5 - Mechanical Systems] "
+  },
+  {
+    "q": "Table 11.2",
+     "a": "Allowable Pipe Joint Deflection (Degrees) [Source: Pipe & Exc.,  Ch. 11 - Mechanical Systems] "
+  },
+  {
+    "q": "Table 2.1",
+     "a": "Portland Cerment Types and Usage [Source: Concrete,  Ch. 2 - Cement] "
+  },
+  {
+    "q": "Table B1-1",
+     "a": "Minimum Requirements for Handling & Storage [Source: BCSI, B1 - Handling and Storage] "
+  },
+  {
+    "q": "Table 1.1",
+     "a": "Checklist for Bid Preparation [Source: Pipe & Exc.,  Ch. 1 - Preparing and Submitting Your Bid] "
+  },
+  {
+    "q": "Table 5.1",
+     "a": "Common Drafting Symbols for Masonry [Source: Masonry,  Ch. 5 - Symbols and Abbreviations] "
+  },
+  {
+    "q": "Table 8",
+     "a": "Nominal vs. Actual Sizes of Concrete Block [Source: Masonry,  Ch. 8 - Metric Concrete Masonry Units] "
+  },
+  {
+    "q": "Table 9.1",
+     "a": "Building Stone Classifications and Properties [Source: Masonry,  Ch. 9 - Classification of Stone] "
+  },
+  {
+    "q": "Table 10.1",
+     "a": "Mortar Proportions by Volume (ASTM C270) [Source: Masonry,  Ch. 10 - Mortar Proportions and Uses] "
+  },
+  {
+    "q": "Table 15.1",
+     "a": "Minimum Width and Thickness of Footings [Source: Masonry,  Ch. 15 - Foundations and Footings] "
+  },
+  {
+    "q": "Table 20.2",
+     "a": "Minimum Curing Times for Strength [Source: Masonry,  Ch. 20 - Curing Concrete] "
+  },
+{
+    "q": "Table 1006.2.1",
+     "a": "Spaces with One Exit or Exit Access Doorway [Source: IBC 2018, Ch. 10 Means of Egress - Numbers of Exits] "
+  },
+  {
+    "q": "Table 1006.3.5(1)",
+    "a": "Stories with One Exit or Access to One Exit for R-2 Occupancies [Source: IBC 2018, Ch.  10 Means of Egress - Numbers of Exits] "
+  },
+  {
+    "q": "Table 1017.2",
+    "a": "Exit Access Travel Distance [Source: IBC 2018, Ch.  10 Means of Egress - Exit Access] "
+  },
+  {
+    "q": "Table 1020.1",
+    "a": "Corridor Fire-Resistance Rating [Source: IBC 2018, Ch.  10 Means of Egress - Corridors] "
+  },
+  {
+    "q": "Table 1604.5",
+    "a": "Risk Category of Buildings and Other Structures [Source: IBC 2018, Ch.  16 Structural Design - General Design Requirements] "
+  },
+  {
+    "q": "Table 1607.1",
+    "a": "Minimum Uniformly Distributed Live Loads and Minimum Concentrated Live Loads [Source: IBC 2018, Ch.  16 Structural Design - Live Loads] "
+  },
+  {
+    "q": "Table 1610.1",
+    "a": "Soil Lateral Load [Source: IBC 2018, Ch.  16 Structural Design - Soil Lateral Loads] "
+  },
+  {
+    "q": "Table 1705.3",
+    "a": "Required Special Inspections and Tests of Concrete Construction [Source: IBC 2018, Ch.  17 Special Inspections - Special Inspections] "
+  },
+  {
+    "q": "Table 1806.2",
+    "a": "Presumptive Load-Bearing Values [Source: IBC 2018, Ch.  18 Soils and Foundations - Presumptive Load-Bearing Values] "
+  },
+  {
+    "q": "Table 2504.10.1",
+    "a": "Fastening Schedule [Source: IBC 2018, Ch.  23 Wood - General Construction Requirements] "
+  },
+  {
+    "q": "Table 2308.4.1.1(1)",
+    "a": "Header and Girder Spans-Exterior Walls [Source: IBC 2018, Ch.  23 Wood - Conventional Light-Frame Construction] "
+  },
+  {
+    "q": "Table 2902.1",
+    "a": "Minimum Number of Required Plumbing Fixtures [Source: IBC 2018, Ch.  29 Plumbing Systems - Minimum Plumbing Facilities] "
+  },
+  {
+    "q": "Table 1.12",
+     "a": "Screws for Gypsum Panel Attachment [Source: Gypsum,  Ch. 1 - Fasteners] "
+  },
+  {
+    "q": "Table 1.14",
+     "a": "Joint Compound Coverage and Usage Rates [Source: Gypsum,  Ch. 1 - Joint Compounds] "
+  },
+  {
+    "q": "Table 2.1",
+    "a": "Max.  Framing Spacing (Single-Layer) [Source: Gypsum,  Ch. 2 - Framing Member Spacing] "
+  },
+  {
+    "q": "Table 2.3",
+     "a": "Steel Studs & Runners (Load/Height) [Source: Gypsum,  Ch. 2 - Steel Framing] "
+  },
+  {
+    "q": "Table 2.6",
+     "a": "Suspended Ceiling Hanger Wire Spacing [Source: Gypsum,  Ch. 2 - Ceiling Suspension] "
+  },
+  {
+    "q": "Table 3.1",
+     "a": "Maximum Spacing of Control Joints [Source: Gypsum,  Ch. 3 - General Planning] "
+  },
+  {
+    "q": "Table 3.6",
+     "a": "Adhesive Usage for Laminating Panels [Source: Gypsum,  Ch. 3 - Adhesive Application] "
+  },
+  {
+    "q": "Table 3.12",
+     "a": "Bending Radii for Dry Gypsum Panels [Source: Gypsum,  Ch. 3 - Curved Surfaces] "
+  },
+  {
+    "q": "Table 3.13",
+     "a": "Bending Radii for Wet Gypsum Panels [Source: Gypsum,  Ch. 3 - Curved Surfaces] "
+  },
+  {
+    "q": "Table 4.1",
+     "a": "Durock Cement Board Performance [Source: Gypsum,  Ch. 4 - Cement Board Products] "
+  },
+  {
+    "q": "Table 4.4",
+     "a": "Tile Backerboard Fastener Spacing [Source: Gypsum,  Ch. 4 - Backerboard Installation] "
+  },
+  {
+    "q": "Table 5.1",
+     "a": "Recommended Levels of Gypsum Finish [Source: Gypsum,  Ch. 5 - Levels of Gypsum Finishing] "
+  },
+  {
+    "q": "Table 7.1",
+     "a": "Lath and Plaster Weights (Design Loads) [Source: Gypsum,  Ch. 7 - Plaster Bases] "
+  },
+  {
+    "q": "Table 7.5",
+     "a": "Basecoat Plaster: Mixing Ratios [Source: Gypsum,  Ch. 7 - Basecoat Plasters] "
+  },
+  {
+    "q": "Table 8.4",
+     "a": "Maximum Support Spacing for Metal Lath [Source: Gypsum,  Ch. 8 - Plaster Applications] "
+  },
+  {
+    "q": "Table 8.6",
+     "a": "Plaster Setting Times (Typical Ranges) [Source: Gypsum,  Ch. 8 - Setting Time] "
+  },
+  {
+    "q": "Table 10.1",
+     "a": "Surface Burn Characteristics (Flame/Smoke) [Source: Gypsum,  Ch. 10 - Fire Safety] "
+  },
+  {
+    "q": "Table 10.2",
+     "a": "Fire-Resistant Design: Cavity Shaft Walls [Source: Gypsum,  Ch. 10 - Fire Resistance] "
+  },
+  {
+    "q": "Table 10.4",
+     "a": "STC Ratings: Steel Stud Partition [Source: Gypsum,  Ch. 10 - Sound Transmission] "
+  },
+  {
+    "q": "Table 10.5",
+     "a": "Vapor Retarder Permeance Ratings [Source: Gypsum,  Ch. 10 - Vapor/Moisture Control] "
+  },
+  {
+    "q": "Table 10.9",
+     "a": "Thermal Resistance (R-Values) [Source: Gypsum,  Ch. 10 - Thermal Properties] "
+  },
+  {
+    "q": "Table 12.2",
+     "a": "Inspection Checklists: Framing [Source: Gypsum,  Ch. 12 - Quality Control] "
+  },
+  {
+    "q": "Table 12.5",
+     "a": "Inspection Checklists: Finishing [Source: Gypsum,  Ch. 12 - Quality Control] "
+  },
+  {
+    "q": "Table A1",
+     "a": "Metric Conversion for Gypsum Materials [Source: Gypsum, Appendix - Metric Conversions] "
+  },
+  {
+    "q": "Table 402.1.1",
+     "a": "Insulation & Fenestration Requirements [Source: 2009 IECC,  Ch. 4 - Residential Energy Efficiency] "
+  },
+  {
+    "q": "Table 402.1.3",
+     "a": "Equivalent U-Factors (Alternative) [Source: 2009 IECC,  Ch. 4 - Residential Energy Efficiency] "
+  },
+  {
+    "q": "Table 402.2.5",
+     "a": "Steel-Frame Ceiling/Wall/Floor Factors [Source: 2009 IECC,  Ch. 4 - Specific Insulation Req.] "
+  },
+  {
+    "q": "Table 402.4.2",
+     "a": "Air Barrier & Insulation Inspection [Source: 2009 IECC,  Ch. 4 - Air Leakage] "
+  },
+  {
+    "q": "Table 405.5.2(1)",
+     "a": "Standard Reference Design Characteristics [Source: 2009 IECC,  Ch. 4 - Simulated Performance] "
+  },
+  {
+    "q": "Table 502.1.2",
+     "a": "Default Fenestration U-Factors [Source: 2009 IECC,  Ch. 5 - Commercial Energy Efficiency] "
+  },
+  {
+    "q": "Table 502.2(1)",
+     "a": "Opaque Thermal Envelope Requirements [Source: 2009 IECC,  Ch. 5 - Commercial Energy Efficiency] "
+  },
+  {
+    "q": "Table 502.2.1.1",
+     "a": "Solar Reflectance & Thermal Emittance [Source: 2009 IECC,  Ch. 5 - Roof Solar Reflectance] "
+  },
+  {
+    "q": "Table 502.3",
+     "a": "Fenestration (Windows/Doors) Requirements [Source: 2009 IECC,  Ch. 5 - Commercial Energy Efficiency] "
+  },
+  {
+    "q": "Table 502.4.3",
+     "a": "Maximum Air Leakage (Doors/Windows) [Source: 2009 IECC,  Ch. 5 - Air Leakage] "
+  },
+  {
+    "q": "Table 503.2.3(1)",
+     "a": "Minimum Efficiency: AC/Heat Pumps [Source: 2009 IECC,  Ch. 5 - Mechanical Systems] "
+  },
+  {
+    "q": "Table 503.2.5(2)",
+     "a": "Minimum Efficiency: Water Chilling [Source: 2009 IECC,  Ch. 5 - Mechanical Systems] "
+  },
+  {
+    "q": "Table 503.2.3(4)",
+     "a": "Minimum Efficiency: Warm Air Furnaces [Source: 2009 IECC,  Ch. 5 - Mechanical Systems] "
+  },
+  {
+    "q": "Table 503.2.3(5)",
+     "a": "Minimum Efficiency: Boilers [Source: 2009 IECC,  Ch. 5 - Mechanical Systems] "
+  },
+  {
+    "q": "Table 503.2.8",
+     "a": "Minimum Pipe Insulation Thickness [Source: 2009 IECC,  Ch. 5 - HVAC Piping Insulation] "
+  },
+  {
+    "q": "Table 505.5.1(1)",
+     "a": "Economizer High Limit Shutoff [Source: 2009 IECC,  Ch. 5 - Economizers] "
+  },
+  {
+    "q": "Table 504.2",
+     "a": "Service Water Heating Efficiencies [Source: 2009 IECC,  Ch. 5 - Service Water Heating] "
+  },
+  {
+    "q": "Table 505.5.2",
+     "a": "Interior Lighting Power Allowances [Source: 2009 IECC,  Ch. 5 - Lighting Power] "
+  },
+  {
+    "q": "Table 505.6.2(1)",
+     "a": "Exterior Lighting Power Allowances [Source: 2009 IECC,  Ch. 5 - Exterior Lighting] "
+  },
+  {
+    "q": "Table 505.6.2(2)",
+     "a": "Individual Lighting Power Allowances [Source: 2009 IECC,  Ch. 5 - Exterior Lighting] "
+  },
+  {
+    "q": "Table A101.1",
+     "a": "Thermal Properties of Materials [Source: 2009 IECC, Appendix - General] "
+  },
+  {
+    "q": "Table A103.1",
+     "a": "Wood-Frame Wall Assembly U-Factors [Source: 2009 IECC, Appendix - Assembly U-Factors] "
+  },
+  {
+    "q": "Table A105.1",
+     "a": "Concrete/Masonry Wall U-Factors [Source: 2009 IECC, Appendix - Assembly U-Factors] "
+  },
+  {
+    "q": "Table 2.2",
+     "a": "Chemical Admixtures: Functions and Effects [Source: Concrete,  Ch. 2 - Admixtures] "
+  },
+  {
+    "q": "Table 2.3",
+     "a": "Target Slump for Various Construction Types [Source: Concrete,  Ch. 2 - Concrete Mixture Design] "
+  },
+  {
+    "q": "Table 3.1",
+     "a": "Reference Specifications for Concrete [Source: Concrete,  Ch. 3 - Reference Specifications] "
+  },
+  {
+    "q": "Table 3.2",
+     "a": "Minimum Cement Content Requirements [Source: Concrete,  Ch. 3 - Minimum Cement Content] "
+  },
+  {
+    "q": "Table 3.3",
+    "a": "Max.  Water-Cementitious Materials Ratio (w/cm) [Source: Concrete,  Ch. 3 - Water-Cement Ratio (w/c)] "
+  },
+  {
+    "q": "Table 3.4",
+     "a": "Air Content Requirements for Frost Exposure [Source: Concrete,  Ch. 3 - Air Entrainment] "
+  },
+  {
+    "q": "Table 4.1",
+     "a": "Presumptive Soil Bearing Capacities [Source: Concrete,  Ch. 4 - Bearing Capacity] "
+  },
+  {
+    "q": "Table 5.1",
+     "a": "Safe Stripping Pressures for Formwork [Source: Concrete,  Ch. 5 - Design of Forms] "
+  },
+  {
+    "q": "Table 5.2",
+     "a": "Formwork Pressure Variables (Temperature/Rate) [Source: Concrete,  Ch. 5 - Placing Concrete in Forms] "
+  },
+  {
+    "q": "Table 5.3",
+     "a": "Minimum Shore/Reshore Requirements [Source: Concrete,  Ch. 5 - Shoring and Reshoring] "
+  },
+  {
+    "q": "Table 6.1",
+     "a": "Minimum Concrete Cover for Reinforcement [Source: Concrete,  Ch. 6 - Concrete Cover] "
+  },
+  {
+    "q": "Table 6.2",
+     "a": "Reinforcing Bar Sizes, Diameters, and Weights [Source: Concrete,  Ch. 6 - Reinforcing Bar Fabrication] "
+  },
+  {
+    "q": "Table 6.3",
+     "a": "Tolerances for Placing Rebar and Stirrups [Source: Concrete,  Ch. 6 - Tolerances in Placing Steel] "
+  },
+  {
+    "q": "Table 6.4",
+     "a": "Minimum Lap Splice Lengths (Grade 60 Steel) [Source: Concrete,  Ch. 6 - Splicing Reinforcing Steel] "
+  },
+  {
+    "q": "Table 8.1",
+     "a": "Joint Spacing for Slabs-on-Ground [Source: Concrete,  Ch. 8 - Contract(ion) (Control) Joints] "
+  },
+  {
+    "q": "Table 8.2",
+     "a": "Dowel Sizes for Construction Joints [Source: Concrete,  Ch. 8 - Construction Joints] "
+  },
+  {
+    "q": "Table 10.1",
+     "a": "Preconstruction Conference Checklist [Source: Concrete,  Ch. 10 - Preconstruction Conference] "
+  },
+  {
+    "q": "Table 11.1",
+     "a": "Guide for Consolidating Concrete (Vibration) [Source: Concrete,  Ch. 11 - Consolidation during Placement] "
+  },
+  {
+    "q": "Table 11.2",
+     "a": "Evaporation Rate Nomograph (Cracking Risk) [Source: Concrete,  Ch. 11 - Hot Weather Placement] "
+  },
+  {
+    "q": "Table 11.3",
+    "a": "Cold Weather Temperature Protection Req.  [Source: Concrete,  Ch. 11 - Cold Weather Placement] "
+  },
+  {
+    "q": "Table 11.4",
+     "a": "Floor Flatness/Levelness (FF/FL) Tolerances [Source: Concrete,  Ch. 11 - Finishing a Slab-on-Ground] "
+  },
+  {
+    "q": "Table 11.5",
+     "a": "Minimum Curing Times for Strength Gain [Source: Concrete,  Ch. 11 - Curing] "
+  },
+  {
+    "q": "Table 12.1",
+     "a": "Troubleshooting Guide: Fresh Concrete Problems [Source: Concrete,  Ch. 12 - Fresh Concrete] "
+  },
+  {
+    "q": "Table 12.2",
+     "a": "Troubleshooting Guide: Hardened Concrete Defects [Source: Concrete,  Ch. 12 - Hardened Concrete] "
+  },
+  {
+    "q": "Table B1-2",
+     "a": "Critical Dimensions for Truss Bundling [Source: BCSI, B1 - Hoisting and Storage] "
+  },
+  {
+    "q": "Table B2-1",
+     "a": "Maximum Spacing for Temporary Bracing [Source: BCSI, B2 - Truss Installation & Bracing] "
+  },
+  {
+    "q": "Table B2-2",
+     "a": "Minimum Quantity of Bracing per Truss Span [Source: BCSI, B2 - Temporary Restraint/Bracing] "
+  },
+  {
+    "q": "Table B2-3",
+     "a": "Fastener Requirements for Temporary Bracing [Source: BCSI, B2 - Bracing Materials] "
+  },
+  {
+    "q": "Table B3-1",
+    "a": "Ground Hanging vs. Crane Set Bracing Req.  [Source: BCSI, B3 - Permanent Restraint/Bracing] "
+  },
+  {
+    "q": "Table B3-2",
+     "a": "Web Reinforcement Requirements [Source: BCSI, B3 - Permanent Restraint/Bracing] "
+  },
+  {
+    "q": "Table B3-3",
+     "a": "Top Chord Permanent Bracing Spacing [Source: BCSI, B3 - Permanent Restraint/Bracing] "
+  },
+  {
+    "q": "Table B4-1",
+     "a": "Construction Load Limits (Sheathing/Shingles) [Source: BCSI, B4 - Construction Loads] "
+  },
+  {
+    "q": "Table B4-2",
+     "a": "Maximum Material Weights for Stacked Loads [Source: BCSI, B4 - Construction Loads] "
+  },
+  {
+    "q": "Table B5-1",
+     "a": "Gable End Bracing Requirements [Source: BCSI, B5 - Gable End Bracing] "
+  },
+  {
+    "q": "Table B5-2",
+     "a": "Strut/Purline Sizes for Gable Bracing [Source: BCSI, B5 - Gable End Bracing] "
+  },
+  {
+    "q": "Table B6-1",
+     "a": "Post-Fire Inspection Criteria [Source: BCSI, B6 - Fire Performance] "
+  },
+  {
+    "q": "Table B7-1",
+     "a": "Temporary Bracing for Long Span Trusses [Source: BCSI, B7 - Temporary Bracing] "
+  },
+  {
+    "q": "Table B7-2",
+     "a": "Lateral Restraint Spacing for Web Members [Source: BCSI, B7 - Web Bracing] "
+  },
+  {
+    "q": "Table B8-1",
+     "a": "Multi-Ply Truss Nailing Requirements [Source: BCSI, B8 - Multi-Ply Girders] "
+  },
+  {
+    "q": "Table B8-2",
+     "a": "Screw and Bolt Spacing for Girder Trusses [Source: BCSI, B8 - Multi-Ply Girders] "
+  },
+  {
+    "q": "Table B9-1",
+     "a": "Field Repair Evaluation Checklist [Source: BCSI, B9 - Damage and Repair] "
+  },
+  {
+    "q": "Table B10-1",
+     "a": "Parallel Chord Truss Bracing Spacing [Source: BCSI, B10 - Parallel Chord Trusses] "
+  },
+  {
+    "q": "Table B11-1",
+     "a": "Fall Protection Anchorage Points [Source: BCSI, B11 - Fall Protection] "
+  },
+  {
+    "q": "Table B11-2",
+     "a": "Safety Equipment Inspection Intervals [Source: BCSI, B11 - Fall Protection] "
+  },
+  {
+    "q": "Table B12-1",
+     "a": "Common Field Alteration Warning Signs [Source: BCSI, B12 - Field Alterations] "
+  },
+  {
+    "q": "Table B13-1",
+     "a": "Concrete/Masonry Bearing Tolerances [Source: BCSI, B13 - Truss Bearing] "
+  },
+  {
+    "q": "Table B14-1",
+     "a": "Cantilevered Truss Overhang Limits [Source: BCSI, B14 - Special Conditions] "
+  },
+  {
+    "q": "Table B15-1",
+     "a": "Hanger & Connector Selection for Floor Trusses [Source: BCSI, B15 - Connectors] "
+  },
+  {
+    "q": "Table 2.1",
+     "a": "Loose vs. Bank Cubic Yards (Swell Factors) [Source: Pipe & Exc.,  Ch. 2 - Trench Excavation Quantities] "
+  },
+  {
+    "q": "Table 2.2",
+     "a": "Trench Volume per Linear Foot (by Width/Depth) [Source: Pipe & Exc.,  Ch. 2 - Trench Excavation Quantities] "
+  },
+  {
+    "q": "Table 2.3",
+     "a": "Equipment Production Cycle Times [Source: Pipe & Exc.,  Ch. 2 - Equipment Performance] "
+  },
+  {
+    "q": "Table 2.4",
+     "a": "Hourly Crew vs. Equipment Cost Analysis [Source: Pipe & Exc.,  Ch. 2 - Comparing Crew and Equipment] "
+  },
+  {
+    "q": "Table 3.1",
+     "a": "Common Plan Symbols and Abbreviations [Source: Pipe & Exc.,  Ch. 3 - Reading Plans] "
+  },
+  {
+    "q": "Table 5.2",
+     "a": "Laser Slope/Grade Conversion Chart [Source: Pipe & Exc.,  Ch. 3 - Lasers] "
+  },
+  {
+    "q": "Table 4.1",
+     "a": "Clearing and Grubbing Production Rates [Source: Pipe & Exc.,  Ch. 4 - Clearing Trees] "
+  },
+  {
+    "q": "Table 5.1",
+     "a": "Backhoe/Excavator Bucket Capacity (Heaped) [Source: Pipe & Exc.,  Ch. 5 - How Backhoes and Trackhoes Work] "
+  },
+  {
+    "q": "Table 5.2",
+     "a": "Estimating Cycle Time by Dig Depth [Source: Pipe & Exc.,  Ch. 5 - Calculating Production Rates] "
+  },
+  {
+    "q": "Table 5.3",
+     "a": "Lifting Capacity: Wheeled vs. Tracked Units [Source: Pipe & Exc.,  Ch. 5 - The Wheeled Backhoe] "
+  },
+  {
+    "q": "Table 6.1",
+     "a": "Soil Classification: Grain Size and Type [Source: Pipe & Exc.,  Ch. 6 - Soil Structure] "
+  },
+  {
+    "q": "Table 6.2",
+     "a": "Optimum Moisture Content for Compaction [Source: Pipe & Exc.,  Ch. 6 - Determining Soil Density] "
+  },
+  {
+    "q": "Table 6.3",
+     "a": "Compaction Equipment Selection Guide [Source: Pipe & Exc.,  Ch. 6 - Compaction Methods] "
+  },
+  {
+    "q": "Table 7.1",
+     "a": "Thrust Block Bearing Area (Sq. Ft.) [Source: Pipe & Exc.,  Ch. 7 - Water Pressure and Thrust] "
+  },
+  {
+    "q": "Table 7.2",
+     "a": "Water Service Pipe Pressure Ratings [Source: Pipe & Exc.,  Ch. 7 - Pipe Materials] "
+  },
+  {
+    "q": "Table 8.1",
+     "a": "Septic Tank Sizing Based on Bedroom Count [Source: Pipe & Exc.,  Ch. 8 - Septic Tank Systems] "
+  },
+  {
+    "q": "Table 8.2",
+     "a": "Standard Manhole Selection and Invert Heights [Source: Pipe & Exc.,  Ch. 8 - Municipal Sewer Systems] "
+  },
+  {
+    "q": "Table 8.3",
+     "a": "Max Lift Thickness for Backfill Compaction [Source: Pipe & Exc.,  Ch. 8 - Backfill, Compaction, Restoration] "
+  },
+  {
+    "q": "Table 9.1",
+     "a": "Geometric Formulas for Area and Volume [Source: Pipe & Exc.,  Ch. 9 - Calculating Area] "
+  },
+  {
+    "q": "Table 9.2",
+     "a": "Average End Area Calculation Worktable [Source: Pipe & Exc.,  Ch. 9 - The Average End Area Method] "
+  },
+  {
+    "q": "Table 10.1",
+     "a": "Rock Rippability Based on Seismic Velocity [Source: Pipe & Exc.,  Ch. 10 - Ripping and Rock Work] "
+  },
+  {
+    "q": "Table 10.2",
+     "a": "Pump Capacity for De-watering Operations [Source: Pipe & Exc.,  Ch. 10 - Working in Groundwater] "
+  },
+  {
+    "q": "Table 11.1",
+     "a": "Schedule 40 vs. 80 PVC Dimensions [Source: Pipe & Exc.,  Ch. 11 - DWV and Pressure Pipe Joints] "
+  },
+  {
+    "q": "Table 6.1",
+     "a": "Geometric Formulas for Area and Volume [Source: Masonry,  Ch. 6 - Areas and Volumes] "
+  },
+  {
+    "q": "Table 6.2",
+     "a": "Metric to US Customary Conversion Factors [Source: Masonry,  Ch. 6 - Metric Measurement] "
+  },
+  {
+    "q": "Table 7",
+     "a": "ASTM C62 Grade Requirements for Brick [Source: Masonry,  Ch. 7 - Classification of Brick] "
+  },
+  {
+    "q": "Table 7.2",
+     "a": "Standard Dimensions for Modular Brick [Source: Masonry,  Ch. 7 - Brick Sizes and Nomenclature] "
+  },
+  {
+    "q": "Table 7.3",
+     "a": "Appearance Grades for Facing Brick (FBA, FBS, FBX) [Source: Masonry,  Ch. 7 - Classification of Brick] "
+  },
+  {
+    "q": "Table 8.2",
+     "a": "Weights of CMU based on Aggregate Type [Source: Masonry,  Ch. 8 - Classification of CMU] "
+  },
+  {
+    "q": "Table 10.2",
+     "a": "Grout Proportions for Reinforced Masonry [Source: Masonry,  Ch. 10 - Grout] "
+  },
+  {
+    "q": "Table 10.3",
+     "a": "Guide for Selection of Masonry Mortars [Source: Masonry,  Ch. 10 - Mortar Proportions and Uses] "
+  },
+  {
+    "q": "Table 10.4",
+     "a": "Hot Weather Masonry Construction Requirements [Source: Masonry,  Ch. 10 - Climactic Conditions] "
+  },
+  {
+    "q": "Table 10.5",
+     "a": "Cold Weather Masonry Construction Requirements [Source: Masonry,  Ch. 10 - Climactic Conditions] "
+  },
+  {
+    "q": "Table 10.6",
+     "a": "Mortar Materials per 1000 Units [Source: Masonry,  Ch. 10 - Estimating Mortar Quantities] "
+  },
+  {
+    "q": "Table 11.1",
+     "a": "Rebar Sizes, Diameters, and Cross Sections [Source: Masonry,  Ch. 11 - Reinforcing Rods or Bars] "
+  },
+  {
+    "q": "Table 11.2",
+     "a": "Proper Spacing for Wire Joint Reinforcement [Source: Masonry,  Ch. 11 - Joint Reinforcement] "
+  },
+  {
+    "q": "Table 12.1",
+     "a": "Recommended Joint Finishes and Descriptions [Source: Masonry,  Ch. 12 - Basic Operations] "
+  },
+  {
+    "q": "Table 12.2",
+     "a": "Efflorescence Cleaning Solutions [Source: Masonry,  Ch. 12 - Cleaning New Masonry] "
+  },
+  {
+    "q": "Table 16.3",
+     "a": "Vertical Reinforcement Spacing for Walls [Source: Masonry,  Ch. 16 - Wall Elements] "
+  },
+  {
+    "q": "Table 17.1",
+     "a": "Recommended Chimney Flue Sizes [Source: Masonry,  Ch. 17 - Fireplace and Chimney] "
+  },
+  {
+    "q": "Table 18.1",
+     "a": "Concrete Slump Recommendations [Source: Masonry,  Ch. 18 - Concrete Mixtures] "
+  },
+  {
+    "q": "Table 20.1",
+     "a": "Control Joint Spacing for Concrete Slabs [Source: Masonry,  Ch. 20 - Joints in Concrete] "
+  }
+    ];
+
     // --- ASSIGN PERMANENT IDs ---
     rawData.forEach((item, index) => item.id = index + 1);
     allMCQData.forEach((item, index) => item.id = index + 1);
     mixedTopicData.forEach((item, index) => item.id = "M" + (index + 1)); // Prefix M for Mixed
     latestImportantData.forEach((item, index) => item.id = "L" + (index + 1));
+    keyTablesData.forEach((item, index) => item.id = "T" + (index + 1));
 
     var mcqStudyData = allMCQData.map(item => ({
         q: item.q,
@@ -16235,7 +17040,8 @@
         else if(currentMode === 'mcq-study') data = mcqStudyData;
         else if(currentMode === 'mcq') data = allMCQData;
         else if(currentMode === 'mixed-topic') data = mixedTopicData;
-        else if(currentMode === 'latest-important') data = latestImportantData; // <-- NEW
+        else if(currentMode === 'latest-important') data = latestImportantData; 
+        else if(currentMode === 'key-tables') data = keyTablesData; // <-- NEW
         else return;
 
         const total = data.length;
@@ -16335,15 +17141,11 @@
         window.bookStructure = {};
         
         let dataToScan = [];
-        if (currentMode === 'flashcard') {
-            dataToScan = rawData;
-        } else if (currentMode === 'mixed-topic') {
-            dataToScan = mixedTopicData;
-        } else if (currentMode === 'latest-important') { // <-- NEW
-            dataToScan = latestImportantData;
-        } else {
-            dataToScan = [...allMCQData]; 
-        }
+        if (currentMode === 'flashcard') dataToScan = rawData;
+        else if (currentMode === 'mixed-topic') dataToScan = mixedTopicData;
+        else if (currentMode === 'latest-important') dataToScan = latestImportantData; 
+        else if (currentMode === 'key-tables') dataToScan = keyTablesData; // <-- NEW
+        else dataToScan = [...allMCQData]; 
         
         dataToScan.forEach(item => {
             const sources = parseSource(item); 
@@ -16421,7 +17223,7 @@
     }
 
     // --- MASTER FILTER LOGIC ---
-    window.applyMasterFilter = function() {
+   window.applyMasterFilter = function() {
         stopAudio();
         
         let baseData;
@@ -16429,17 +17231,16 @@
         else if(currentMode === 'mcq-study') baseData = mcqStudyData;
         else if(currentMode === 'mcq') baseData = allMCQData;
         else if(currentMode === 'mixed-topic') baseData = mixedTopicData;
-        else if(currentMode === 'latest-important') baseData = latestImportantData; // <-- NEW
+        else if(currentMode === 'latest-important') baseData = latestImportantData; 
+        else if(currentMode === 'key-tables') baseData = keyTablesData; // <-- NEW
         else return;
 
         let filtered = baseData;
 
-        // 0. Mixed Topic Specific Filter
         if(currentMode === 'mixed-topic' && window.currentMixedTopic !== 'all') {
             filtered = filtered.filter(item => item.topic === window.currentMixedTopic);
         }
 
-        // 1. Filter by Book & Chapter
         if (window.currentBookFilter !== 'all') {
             filtered = filtered.filter(item => {
                 const sources = parseSource(item); 
@@ -16451,7 +17252,6 @@
             });
         }
 
-        // 2. Filter by Flags (Chips)
         if (currentMode !== 'mcq' && currentFilterType !== 'all') {
             filtered = filtered.filter(item => {
                 const flags = window.flaggedItems[item.q];
@@ -16460,7 +17260,6 @@
             });
         }
         
-        // 3. Search Filter
         const term = document.getElementById('searchInput').value.toLowerCase();
         if (term && currentMode !== 'mcq') {
             filtered = filtered.filter(item => {
@@ -16469,7 +17268,6 @@
             });
         }
         
-        // RENDER LOGIC
         if (currentMode === 'mcq') {
             currentMCQItems = filtered;
             examScore = 0; examAttempts = 0;
@@ -16511,9 +17309,8 @@
                 document.getElementById('quiz-list').style.display = 'block';
                 renderList(mappedData);
             }
-
         } else {
-            // Flashcard, Study Mock, AND Latest Important Mode <-- NEW routing applies here
+            // Flashcard, Study Mock, Latest Important, AND Key Tables Mode routing
             renderList(filtered);
         }
     }
@@ -16534,7 +17331,8 @@
             else if(currentMode === 'mcq-study') baseData = mcqStudyData;
             else if(currentMode === 'mcq') baseData = allMCQData;
             else if(currentMode === 'mixed-topic') baseData = mixedTopicData;
-            else if(currentMode === 'latest-important') baseData = latestImportantData; // <-- NEW
+            else if(currentMode === 'latest-important') baseData = latestImportantData; 
+            else if(currentMode === 'key-tables') baseData = keyTablesData; // <-- NEW
             
             const [start, end] = val.split('-').map(Number);
             let data = baseData.slice(start, end);
@@ -16576,7 +17374,7 @@
     }
 
     // --- MODE SWITCHER (OPTIMIZED FOR LAG) ---
-    window.switchMode = function(mode) {
+   window.switchMode = function(mode) {
         playSound('click');
         stopAudio();
         
@@ -16605,13 +17403,15 @@
             const btnMcq = document.getElementById('btn-mcq');
             const btnMaterial = document.getElementById('btn-material');
             const btnMixed = document.getElementById('btn-mixed');
-            const btnLatest = document.getElementById('btn-latest'); // <-- NEW
+            const btnLatest = document.getElementById('btn-latest'); 
+            const btnTables = document.getElementById('btn-tables'); // <-- NEW
 
             btnFlash.classList.remove('primary'); 
             btnMcqStudy.classList.remove('primary');
             btnMcq.classList.remove('primary');
             btnMaterial.classList.remove('primary');
-            if(btnLatest) btnLatest.classList.remove('primary'); // <-- NEW
+            if(btnLatest) btnLatest.classList.remove('primary'); 
+            if(btnTables) btnTables.classList.remove('primary'); // <-- NEW
             btnMixed.classList.remove('mixed-active'); 
             btnMixed.style.border = "1px solid var(--border)"; 
 
@@ -16638,35 +17438,30 @@
                 mixedControls.style.display = 'none';
                 scoreBoard.style.display = 'none';
                 document.body.style.paddingBottom = "90px";
-                
                 window.currentFolder = null;
                 renderStudyMaterials();
 
             } else if(mode === 'mixed-topic') {
                 btnMixed.style.border = "1px solid #8b5cf6"; 
-                
                 flashList.style.display = 'none'; 
                 mcqList.style.display = 'block'; 
                 flashControls.style.display = 'block'; 
                 mixedControls.style.display = 'block'; 
-                
                 searchInput.style.display = 'block';
                 filterSection.style.display = 'block'; 
                 rangeSelect.style.display = 'block';
                 filterDualRow.style.display = 'flex'; 
-                
                 scoreBoard.style.display = 'none';
                 document.body.style.paddingBottom = "240px";
-                
                 populateRangeDropdown();
                 rangeSelect.value = 'all';
-                
                 applyMasterFilter();
 
-            } else if(mode === 'flashcard' || mode === 'mcq-study' || mode === 'latest-important') { // <-- NEW handling combined here
+            } else if(mode === 'flashcard' || mode === 'mcq-study' || mode === 'latest-important' || mode === 'key-tables') { // <-- NEW handling combined here
                 if(mode === 'flashcard') btnFlash.classList.add('primary');
                 else if(mode === 'mcq-study') btnMcqStudy.classList.add('primary');
-                else if(mode === 'latest-important' && btnLatest) btnLatest.classList.add('primary'); // <-- NEW
+                else if(mode === 'latest-important' && btnLatest) btnLatest.classList.add('primary'); 
+                else if(mode === 'key-tables' && btnTables) btnTables.classList.add('primary'); // <-- NEW
 
                 flashList.style.display = 'block';
                 mcqList.style.display = 'none';
@@ -16697,18 +17492,14 @@
                 mcqList.style.display = 'block';
                 flashControls.style.display = 'block'; 
                 mixedControls.style.display = 'none';
-                
                 searchInput.style.display = 'none'; 
                 filterSection.style.display = 'none'; 
                 rangeSelect.style.display = 'block';
                 filterDualRow.style.display = 'flex'; 
-                
                 populateRangeDropdown();
                 rangeSelect.value = 'all';
-
                 scoreBoard.style.display = 'block';
                 document.body.style.paddingBottom = "180px";
-                
                 areAllExpanded = false;
                 expandBtn.innerText = "🔽 Show Answer Key";
                 expandBtn.style.display = 'block';
@@ -17407,8 +18198,8 @@
         areAllExpanded = !areAllExpanded;
         const btn = document.getElementById('expandAllBtn');
         
-        // Added 'latest-important' to the list of modes that use the study card layout
-        if (currentMode === 'flashcard' || currentMode === 'mcq-study' || currentMode === 'latest-important' || (currentMode === 'mixed-topic' && !window.mixedModeOptionsVisible)) {
+        // Added 'key-tables' to the list of modes that use the study card layout
+        if (currentMode === 'flashcard' || currentMode === 'mcq-study' || currentMode === 'latest-important' || currentMode === 'key-tables' || (currentMode === 'mixed-topic' && !window.mixedModeOptionsVisible)) {
             const cards = document.querySelectorAll('.card');
             cards.forEach(card => {
                 if(areAllExpanded) card.classList.add('revealed');
@@ -17416,7 +18207,6 @@
             });
             btn.innerText = areAllExpanded ? "🔼 Collapse All" : "🔽 Expand All";
         } else {
-            // Interactive Mode (MCQ Exam or Mixed Topic Interactive)
             const itemList = (currentMode === 'mixed-topic') ? window.activeDataList : currentMCQItems;
             
             itemList.forEach((item, idx) => {
